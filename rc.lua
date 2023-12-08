@@ -56,7 +56,12 @@ end
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
 -- beautiful.init(gears.filesystem.get_themes_dir() .. "theme/default/theme")
-beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
+-- beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
+
+-- Define a custom color palette for night mode
+beautiful.init("/usr/share/awesome/themes/default/theme.lua") -- You might have a different theme path
+-- Set the gap width (in pixels)
+beautiful.useless_gap = 7
 
 -- beautiful.init("~/.config/awesome/theme-dark.lua")
 
@@ -74,8 +79,8 @@ modkey = "Mod4"
 
 -- Table of layouts to cover with awful.layout.inc, order matters.
 awful.layout.layouts = {
-	awful.layout.suit.floating,
 	awful.layout.suit.tile,
+	awful.layout.suit.floating,
 	awful.layout.suit.tile.left,
 	awful.layout.suit.tile.bottom,
 	awful.layout.suit.tile.top,
@@ -207,7 +212,12 @@ awful.screen.connect_for_each_screen(function(s)
 	set_wallpaper(s)
 
 	-- Each screen has its own tag table.
-	awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
+	-- awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
+	local names = { "Sahith", "2", "3", "4", "5", "6", "7", "Code", "Browser" }
+	local l = awful.layout.suit
+
+	local layouts = { l.tile, l.tile, l.tile, l.tile, l.tile, l.tile, l.tile, l.tile, l.tile }
+	awful.tag(names, s, layouts)
 
 	-- Create a promptbox for each screen
 	s.mypromptbox = awful.widget.prompt()
@@ -282,13 +292,28 @@ globalkeys = gears.table.join(
 	awful.key({ modkey }, "Left", awful.tag.viewprev, { description = "view previous", group = "tag" }),
 	awful.key({ modkey }, "Right", awful.tag.viewnext, { description = "view next", group = "tag" }),
 	awful.key({ modkey }, "Escape", awful.tag.history.restore, { description = "go back", group = "tag" }),
+	-- by me (start)
+	-- sound (set by me)
 	awful.key({}, "XF86AudioRaiseVolume", function()
-		awful.util.spawn("amixer -D pulse sset Master 10%+", false)
+		awful.util.spawn("amixer -D pulse sset Master 5%+", false)
 	end),
 	awful.key({}, "XF86AudioLowerVolume", function()
-		awful.util.spawn("amixer -D pulse sset Master 10%-", false)
+		awful.util.spawn("amixer -D pulse sset Master 5%-", false)
 	end),
 
+	awful.key({ "Mod1" }, "space", function()
+		awful.spawn("flameshot gui")
+	end, { description = "Take a cropped screenshot", group = "screen" }),
+
+	awful.key({}, "Print", function()
+		awful.spawn.with_shell("scrot -s $(zenity --file-selection --save --file=/tmp/screenshot.png)")
+	end, { description = "take a screenshot", group = "screenshot" }),
+
+	-- awful.key({}, "Print", function()
+	-- 	awful.util.spawn("scrot")
+	-- end, { description = "take a screenshot", group = "screenshot" }),
+
+	-- by me end
 	-- commented by me
 
 	-- awful.key({ modkey }, "j", function()
@@ -304,9 +329,42 @@ globalkeys = gears.table.join(
 	end, { description = "focus previous by index", group = "client" }),
 
 	---- Add this line to your globalkeys section
+	-- awful.key({ modkey }, "d", function()
+	-- 	awful.spawn("discord")
+	-- end, { description = "Open Discord", group = "launcher" }),
+
 	awful.key({ modkey }, "d", function()
-		awful.spawn("discord")
-	end, { description = "Open Discord", group = "launcher" }),
+		local screen = awful.screen.focused()
+		local discord_client = nil
+
+		-- Check if Discord is already open on any tag
+		for _, c in ipairs(client.get()) do
+			if awful.rules.match(c, { class = "discord" }) then
+				discord_client = c
+				break
+			end
+		end
+
+		-- If Discord is not open, spawn a new instance on the 4th tag
+		if not discord_client then
+			awful.spawn("discord", { tag = screen.tags[4], placement = awful.placement.centered })
+		else
+			-- Check if Discord is on the current monitor, if not, move it to the 4th tag of the current monitor
+			if discord_client.screen ~= screen then
+				awful.client.movetoscreen(discord_client, screen)
+				awful.client.movetotag(screen.tags[4], discord_client)
+				awful.tag.viewonly(screen.tags[4]) -- switch to 4th workspace
+				client.focus = discord_client
+				discord_client:raise()
+			else
+				-- If Discord is on the current monitor, move to the 4th tag and focus it
+				awful.client.movetotag(screen.tags[4], discord_client)
+				awful.tag.viewonly(screen.tags[4]) -- Switch to the 4th tag / workspace
+				client.focus = discord_client
+				discord_client:raise()
+			end
+		end
+	end, { description = "Open or move Discord to 4th tag", group = "client" }),
 
 	awful.key({ modkey }, "w", function()
 		mymainmenu:show()
@@ -383,17 +441,75 @@ globalkeys = gears.table.join(
 	end, { description = "run prompt", group = "launcher" }),
 
 	-- by  me start
-	awful.key({ modkey }, "c", function()
+	awful.key({ modkey, "Shift" }, "c", function()
 		awful.spawn("google-chrome-stable")
 	end, { description = "open Google Chrome", group = "applications" }),
 
-	awful.key({ modkey }, "space", function()
-		awful.layout.inc(1)
-	end, { description = "select next", group = "layout" }),
+	awful.key({ modkey }, "c", function()
+		local screen = awful.screen.focused()
+		local chrome_client = nil
+
+		-- Check if Chrome is already open on any tag
+		for _, c in ipairs(client.get()) do
+			if awful.rules.match(c, { class = "Google-chrome" }) then
+				chrome_client = c
+				break
+			end
+		end
+
+		-- If Chrome is not open, spawn a new instance on the 9th tag
+		if not chrome_client then
+			awful.spawn("google-chrome", { tag = screen.tags[9], placement = awful.placement.centered })
+		else
+			-- Check if Chrome is on the 9th tag and not on the current monitor
+			if chrome_client.screen ~= screen and awful.tag.getidx(chrome_client.first_tag) == 9 then
+				awful.client.movetoscreen(chrome_client, screen)
+				awful.client.movetotag(screen.tags[9], chrome_client)
+				awful.tag.viewonly(screen.tags[9]) -- switch to 9th workspace
+				client.focus = chrome_client
+				chrome_client:raise()
+			else
+				-- If Chrome is on the current monitor, move to the 9th tag and focus it
+				awful.client.movetotag(screen.tags[9], chrome_client)
+				awful.tag.viewonly(screen.tags[9]) -- Switch to the 9th tag / workspace
+				client.focus = chrome_client
+				chrome_client:raise()
+			end
+		end
+	end, { description = "Open or move Chrome to 9th tag", group = "client" }),
 
 	awful.key({ modkey }, "v", function()
-		awful.util.spawn("code")
-	end, { description = "Open Visual Studio Code", group = "launcher" }),
+		local screen = awful.screen.focused()
+		local vs_code_client = nil
+
+		-- Check if VS Code is already open on any tag
+		for _, c in ipairs(client.get()) do
+			if awful.rules.match(c, { class = "Code" }) then
+				vs_code_client = c
+				break
+			end
+		end
+
+		-- If VS Code is not open, spawn a new instance on the 8th tag
+		if not vs_code_client then
+			awful.spawn("code", { tag = screen.tags[8], placement = awful.placement.centered })
+		else
+			-- Check if VS Code is on the current monitor, if not, move it to the 8th tag of the current monitor
+			if vs_code_client.screen ~= screen then
+				awful.client.movetoscreen(vs_code_client, screen)
+				awful.client.movetotag(screen.tags[8], vs_code_client)
+				awful.tag.viewonly(screen.tags[8]) -- switch to 8th workspace
+				client.focus = vs_code_client
+				vs_code_client:raise()
+			else
+				-- If VS Code is on the current monitor, move to the 8th tag and focus it
+				awful.client.movetotag(screen.tags[8], vs_code_client)
+				awful.tag.viewonly(screen.tags[8]) -- Switch to the 8th tag / workspace
+				client.focus = vs_code_client
+				vs_code_client:raise()
+			end
+		end
+	end, { description = "Open or move VS Code to 8th tag, bring Chrome to 9th if opened elsewhere", group = "client" }),
 
 	awful.key({ modkey }, "b", function()
 		awful.spawn("brave-browser", { fullscreen = false })
@@ -426,6 +542,9 @@ clientkeys = gears.table.join(
 	end, { description = "toggle fullscreen", group = "client" }),
 	-- awful.key({ modkey, "Shift" }, "c", function(c)
 	awful.key({ modkey }, "x", function(c)
+		c:kill()
+	end, { description = "close", group = "client" }),
+	awful.key({ modkey }, "q", function(c)
 		c:kill()
 	end, { description = "close", group = "client" }),
 	awful.key(
@@ -527,7 +646,20 @@ root.keys(globalkeys)
 -- Rules to apply to new clients (through the "manage" signal).
 awful.rules.rules = {
 	-- All clients will match this rule.
+
+	-- Assuming Modkey is Mod4/Win key
+	-- local modkey = "Mod4"
+
+	-- awful.rules.rules = {
+	--     {
+	--         rule = { class = "discord" },
+	--         properties = { screen = 1, tag = awful.util.tagnames[4] }
+	--     },
+	--     -- Other rules for different applications
+	-- }
+
 	{
+
 		rule = {},
 		properties = {
 			border_width = beautiful.border_width,
@@ -649,16 +781,27 @@ end)
 client.connect_signal("unfocus", function(c)
 	c.border_color = beautiful.border_normal
 end)
+
 -- }}}
 
 -- Autostart Application
-awful.spawn.with_shell("compton")
 awful.spawn.with_shell("nitrogen --restore")
+awful.spawn.with_shell("picom --config ~/.config/picom.conf")
 
 -- from here all added by me
 
 -- scripts added by me
 awful.spawn.with_shell("~/scripts/awesomeScripts/swapMonitors.sh") -- monitors setup their position
+awful.spawn.with_shell("~/scripts/awesomeScripts/screenOrienation.sh") -- monitors setup theiro orienation
+
 awful.util.spawn("xinput set-button-map 9 3 2 1")
 
--- my shortcuts
+-- Function to add seconds to the current time
+function add_seconds(seconds)
+	local now = os.time()
+	local new_time = now + seconds
+	os.execute("date -s @" .. new_time) -- Set the system time (Linux-specific)
+end
+
+-- Example: Add 30 seconds to the current time
+add_seconds(30)
