@@ -66,7 +66,9 @@ beautiful.useless_gap = 7
 -- beautiful.init("~/.config/awesome/theme-dark.lua")
 
 -- This is used later as the default terminal and editor to run.
-terminal = "x-terminal-emulator"
+-- terminal = "x-terminal-emulator"
+terminal = "xfce4-terminal"
+
 editor = os.getenv("EDITOR") or "editor"
 editor_cmd = terminal .. " -e " .. editor
 
@@ -459,7 +461,18 @@ globalkeys = gears.table.join(
 
 		-- If Chrome is not open, spawn a new instance on the 9th tag
 		if not chrome_client then
-			awful.spawn("google-chrome", { tag = screen.tags[9], placement = awful.placement.centered })
+			-- awful.spawn("google-chrome", { tag = screen.tags[9], placement = awful.placement.centered })
+			awful.spawn("google-chrome")
+			for _, c in ipairs(client.get()) do
+				if awful.rules.match(c, { class = "Google-chrome" }) then
+					chrome_client = c
+					break
+				end
+			end
+			awful.client.movetoscreen(chrome_client, screen)
+			awful.client.movetotag(screen.tags[9], chrome_client)
+			awful.tag.viewonly(screen.tags[9]) -- switch to 9th workspace
+			client.focus = chrome_client
 		else
 			-- Check if Chrome is on the 9th tag and not on the current monitor
 			if chrome_client.screen ~= screen and awful.tag.getidx(chrome_client.first_tag) == 9 then
@@ -481,7 +494,7 @@ globalkeys = gears.table.join(
 	awful.key({ modkey }, "v", function()
 		local screen = awful.screen.focused()
 		local vs_code_client = nil
-
+	
 		-- Check if VS Code is already open on any tag
 		for _, c in ipairs(client.get()) do
 			if awful.rules.match(c, { class = "Code" }) then
@@ -489,27 +502,68 @@ globalkeys = gears.table.join(
 				break
 			end
 		end
-
-		-- If VS Code is not open, spawn a new instance on the 8th tag
+	
+		-- If VS Code is not open, spawn a new instance on the 8th tag of the current monitor
 		if not vs_code_client then
-			awful.spawn("code", { tag = screen.tags[8], placement = awful.placement.centered })
+			awful.spawn("code" , {fullscreen = false})
+			for _, c in ipairs(client.get()) do
+				if awful.rules.match(c, { class = "Code" }) then
+					vs_code_client = c
+					break
+				end
+			end
+			awful.client.movetotag(screen.tags[8], vs_code_client)
+			awful.tag.viewonly(screen.tags[8])
+			client.focus = vs_code_client
+
 		else
 			-- Check if VS Code is on the current monitor, if not, move it to the 8th tag of the current monitor
 			if vs_code_client.screen ~= screen then
 				awful.client.movetoscreen(vs_code_client, screen)
-				awful.client.movetotag(screen.tags[8], vs_code_client)
-				awful.tag.viewonly(screen.tags[8]) -- switch to 8th workspace
-				client.focus = vs_code_client
-				vs_code_client:raise()
-			else
-				-- If VS Code is on the current monitor, move to the 8th tag and focus it
-				awful.client.movetotag(screen.tags[8], vs_code_client)
-				awful.tag.viewonly(screen.tags[8]) -- Switch to the 8th tag / workspace
-				client.focus = vs_code_client
-				vs_code_client:raise()
 			end
+	
+			-- Move VS Code to the 8th tag and focus it
+			awful.client.movetotag(screen.tags[8], vs_code_client)
+			awful.tag.viewonly(screen.tags[8])
+			client.focus = vs_code_client
+			vs_code_client:raise()
 		end
-	end, { description = "Open or move VS Code to 8th tag, bring Chrome to 9th if opened elsewhere", group = "client" }),
+	end, { description = "Open or move VS Code to 8th tag", group = "client" }),
+
+
+
+	-- awful.key({ modkey }, "v", function()
+	-- 	local screen = awful.screen.focused()
+	-- 	local vs_code_client = nil
+
+	-- 	-- Check if VS Code is already open on any tag
+	-- 	for _, c in ipairs(client.get()) do
+	-- 		if awful.rules.match(c, { class = "Code" }) then
+	-- 			vs_code_client = c
+	-- 			break
+	-- 		end
+	-- 	end
+
+	-- 	-- If VS Code is not open, spawn a new instance on the 8th tag
+	-- 	if not vs_code_client then
+	-- 		awful.spawn("code", { tag = screen.tags[8], placement = awful.placement.centered })
+	-- 	else
+	-- 		-- Check if VS Code is on the current monitor, if not, move it to the 8th tag of the current monitor
+	-- 		if vs_code_client.screen ~= screen then
+	-- 			awful.client.movetoscreen(vs_code_client, screen)
+	-- 			awful.client.movetotag(screen.tags[8], vs_code_client)
+	-- 			awful.tag.viewonly(screen.tags[8]) -- switch to 8th workspace
+	-- 			client.focus = vs_code_client
+	-- 			vs_code_client:raise()
+	-- 		else
+	-- 			-- If VS Code is on the current monitor, move to the 8th tag and focus it
+	-- 			awful.client.movetotag(screen.tags[8], vs_code_client)
+	-- 			awful.tag.viewonly(screen.tags[8]) -- Switch to the 8th tag / workspace
+	-- 			client.focus = vs_code_client
+	-- 			vs_code_client:raise()
+	-- 		end
+	-- 	end
+	-- end, { description = "Open or move VS Code to 8th tag, bring Chrome to 9th if opened elsewhere", group = "client" }),
 
 	awful.key({ modkey }, "b", function()
 		awful.spawn("brave-browser", { fullscreen = false })
@@ -647,17 +701,6 @@ root.keys(globalkeys)
 awful.rules.rules = {
 	-- All clients will match this rule.
 
-	-- Assuming Modkey is Mod4/Win key
-	-- local modkey = "Mod4"
-
-	-- awful.rules.rules = {
-	--     {
-	--         rule = { class = "discord" },
-	--         properties = { screen = 1, tag = awful.util.tagnames[4] }
-	--     },
-	--     -- Other rules for different applications
-	-- }
-
 	{
 
 		rule = {},
@@ -709,7 +752,8 @@ awful.rules.rules = {
 	},
 
 	-- Add titlebars to normal clients and dialogs
-	{ rule_any = { type = { "normal", "dialog" } }, properties = { titlebars_enabled = true } },
+	{ rule_any = { type = { "normal", "dialog" } }, properties = { titlebars_enabled = false } },
+	-- { rule = { class = "Terminator" }, properties = { border_width = 0 } },
 
 	-- Set Firefox to always map on the tag named "2" on screen 1.
 	-- { rule = { class = "Firefox" },
@@ -785,10 +829,11 @@ end)
 -- }}}
 
 -- Autostart Application
-awful.spawn.with_shell("nitrogen --restore")
+-- awful.spawn.with_shell("nitrogen --restore")
 awful.spawn.with_shell("picom --config ~/.config/picom.conf")
+awful.spawn.with_shell("imwheel")
 
--- from here all added by me
+-- from here (all added by me)
 
 -- scripts added by me
 awful.spawn.with_shell("~/scripts/awesomeScripts/swapMonitors.sh") -- monitors setup their position
