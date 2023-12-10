@@ -194,24 +194,24 @@ local tasklist_buttons = gears.table.join(
 	end)
 )
 
-local function set_wallpaper(s)
-	-- Wallpaper
-	if beautiful.wallpaper then
-		local wallpaper = beautiful.wallpaper
-		-- If wallpaper is a function, call it with the screen
-		if type(wallpaper) == "function" then
-			wallpaper = wallpaper(s)
-		end
-		gears.wallpaper.maximized(wallpaper, s, true)
-	end
-end
+-- local function set_wallpaper(s)
+-- 	-- Wallpaper
+-- 	if beautiful.wallpaper then
+-- 		local wallpaper = beautiful.wallpaper
+-- 		-- If wallpaper is a function, call it with the screen
+-- 		if type(wallpaper) == "function" then
+-- 			wallpaper = wallpaper(s)
+-- 		end
+-- 		gears.wallpaper.maximized(wallpaper, s, true)
+-- 	end
+-- end
 
 -- Re-set wallpaper when a screen's geometry changes (e.g. different resolution)
-screen.connect_signal("property::geometry", set_wallpaper)
+-- screen.connect_signal("property::geometry", set_wallpaper)
 
 awful.screen.connect_for_each_screen(function(s)
 	-- Wallpaper
-	set_wallpaper(s)
+	-- set_wallpaper(s)
 
 	-- Each screen has its own tag table.
 	-- awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
@@ -296,6 +296,16 @@ globalkeys = gears.table.join(
 	awful.key({ modkey }, "Escape", awful.tag.history.restore, { description = "go back", group = "tag" }),
 	-- by me (start)
 	-- sound (set by me)
+	awful.key({ "Mod1" }, "r", function()
+		-- Toggle microphone mute command
+		awful.spawn("amixer -D pulse sset Capture toggle")
+	end, { description = "Toggle Microphone Mute", group = "media" }),
+
+	awful.key({}, "XF86AudioMute", function()
+		-- Toggle sound command with amixer
+		awful.spawn("amixer -D pulse set Master 1+ toggle")
+	end, { description = "Toggle Sound", group = "media" }),
+
 	awful.key({}, "XF86AudioRaiseVolume", function()
 		awful.util.spawn("amixer -D pulse sset Master 5%+", false)
 	end),
@@ -494,7 +504,7 @@ globalkeys = gears.table.join(
 	awful.key({ modkey }, "v", function()
 		local screen = awful.screen.focused()
 		local vs_code_client = nil
-	
+
 		-- Check if VS Code is already open on any tag
 		for _, c in ipairs(client.get()) do
 			if awful.rules.match(c, { class = "Code" }) then
@@ -502,10 +512,10 @@ globalkeys = gears.table.join(
 				break
 			end
 		end
-	
+
 		-- If VS Code is not open, spawn a new instance on the 8th tag of the current monitor
 		if not vs_code_client then
-			awful.spawn("code" , {fullscreen = false})
+			awful.spawn("code", { fullscreen = false })
 			for _, c in ipairs(client.get()) do
 				if awful.rules.match(c, { class = "Code" }) then
 					vs_code_client = c
@@ -515,13 +525,12 @@ globalkeys = gears.table.join(
 			awful.client.movetotag(screen.tags[8], vs_code_client)
 			awful.tag.viewonly(screen.tags[8])
 			client.focus = vs_code_client
-
 		else
 			-- Check if VS Code is on the current monitor, if not, move it to the 8th tag of the current monitor
 			if vs_code_client.screen ~= screen then
 				awful.client.movetoscreen(vs_code_client, screen)
 			end
-	
+
 			-- Move VS Code to the 8th tag and focus it
 			awful.client.movetotag(screen.tags[8], vs_code_client)
 			awful.tag.viewonly(screen.tags[8])
@@ -529,8 +538,6 @@ globalkeys = gears.table.join(
 			vs_code_client:raise()
 		end
 	end, { description = "Open or move VS Code to 8th tag", group = "client" }),
-
-
 
 	-- awful.key({ modkey }, "v", function()
 	-- 	local screen = awful.screen.focused()
@@ -836,17 +843,10 @@ awful.spawn.with_shell("imwheel")
 -- from here (all added by me)
 
 -- scripts added by me
+-- awful.spawn.with_shell("~/scripts/awesomeScripts/screenOrienation.sh") -- monitors setup theiro orienation
+-- awful.spawn.with_shell("~/scripts/awesomeScripts/fehForSecondScreen") -- monitors setup theiro orienation
+
+awful.spawn.with_shell("feh --bg-fill ~/wallpapers/pubgphoto.jpg") -- to setup wallpaper
 awful.spawn.with_shell("~/scripts/awesomeScripts/swapMonitors.sh") -- monitors setup their position
-awful.spawn.with_shell("~/scripts/awesomeScripts/screenOrienation.sh") -- monitors setup theiro orienation
 
 awful.util.spawn("xinput set-button-map 9 3 2 1")
-
--- Function to add seconds to the current time
-function add_seconds(seconds)
-	local now = os.time()
-	local new_time = now + seconds
-	os.execute("date -s @" .. new_time) -- Set the system time (Linux-specific)
-end
-
--- Example: Add 30 seconds to the current time
-add_seconds(30)
