@@ -290,6 +290,9 @@ root.buttons(gears.table.join(
 
 -- {{{ Key bindings
 globalkeys = gears.table.join(
+	awful.key({ "Mod1", "Shift" }, ";", function()
+		awful.spawn("shutdown now")
+	end, { description = "Shutdown", group = "awesome" }),
 	awful.key({ modkey }, "s", hotkeys_popup.show_help, { description = "show help", group = "awesome" }),
 	awful.key({ modkey }, "Left", awful.tag.viewprev, { description = "view previous", group = "tag" }),
 	awful.key({ modkey }, "Right", awful.tag.viewnext, { description = "view next", group = "tag" }),
@@ -471,18 +474,12 @@ globalkeys = gears.table.join(
 
 		-- If Chrome is not open, spawn a new instance on the 9th tag
 		if not chrome_client then
-			-- awful.spawn("google-chrome", { tag = screen.tags[9], placement = awful.placement.centered })
-			awful.spawn("google-chrome")
-			for _, c in ipairs(client.get()) do
-				if awful.rules.match(c, { class = "Google-chrome" }) then
-					chrome_client = c
-					break
-				end
+			local screen = awful.screen.focused()
+			local tag = screen.tags[9]
+			if tag then
+				tag:view_only()
+				awful.spawn("google-chrome-stable")
 			end
-			awful.client.movetoscreen(chrome_client, screen)
-			awful.client.movetotag(screen.tags[9], chrome_client)
-			awful.tag.viewonly(screen.tags[9]) -- switch to 9th workspace
-			client.focus = chrome_client
 		else
 			-- Check if Chrome is on the 9th tag and not on the current monitor
 			if chrome_client.screen ~= screen and awful.tag.getidx(chrome_client.first_tag) == 9 then
@@ -515,16 +512,12 @@ globalkeys = gears.table.join(
 
 		-- If VS Code is not open, spawn a new instance on the 8th tag of the current monitor
 		if not vs_code_client then
-			awful.spawn("code", { fullscreen = false })
-			for _, c in ipairs(client.get()) do
-				if awful.rules.match(c, { class = "Code" }) then
-					vs_code_client = c
-					break
-				end
+			local screen = awful.screen.focused()
+			local tag = screen.tags[8]
+			if tag then
+				tag:view_only()
+				awful.spawn("code")
 			end
-			awful.client.movetotag(screen.tags[8], vs_code_client)
-			awful.tag.viewonly(screen.tags[8])
-			client.focus = vs_code_client
 		else
 			-- Check if VS Code is on the current monitor, if not, move it to the 8th tag of the current monitor
 			if vs_code_client.screen ~= screen then
@@ -539,39 +532,6 @@ globalkeys = gears.table.join(
 		end
 	end, { description = "Open or move VS Code to 8th tag", group = "client" }),
 
-	-- awful.key({ modkey }, "v", function()
-	-- 	local screen = awful.screen.focused()
-	-- 	local vs_code_client = nil
-
-	-- 	-- Check if VS Code is already open on any tag
-	-- 	for _, c in ipairs(client.get()) do
-	-- 		if awful.rules.match(c, { class = "Code" }) then
-	-- 			vs_code_client = c
-	-- 			break
-	-- 		end
-	-- 	end
-
-	-- 	-- If VS Code is not open, spawn a new instance on the 8th tag
-	-- 	if not vs_code_client then
-	-- 		awful.spawn("code", { tag = screen.tags[8], placement = awful.placement.centered })
-	-- 	else
-	-- 		-- Check if VS Code is on the current monitor, if not, move it to the 8th tag of the current monitor
-	-- 		if vs_code_client.screen ~= screen then
-	-- 			awful.client.movetoscreen(vs_code_client, screen)
-	-- 			awful.client.movetotag(screen.tags[8], vs_code_client)
-	-- 			awful.tag.viewonly(screen.tags[8]) -- switch to 8th workspace
-	-- 			client.focus = vs_code_client
-	-- 			vs_code_client:raise()
-	-- 		else
-	-- 			-- If VS Code is on the current monitor, move to the 8th tag and focus it
-	-- 			awful.client.movetotag(screen.tags[8], vs_code_client)
-	-- 			awful.tag.viewonly(screen.tags[8]) -- Switch to the 8th tag / workspace
-	-- 			client.focus = vs_code_client
-	-- 			vs_code_client:raise()
-	-- 		end
-	-- 	end
-	-- end, { description = "Open or move VS Code to 8th tag, bring Chrome to 9th if opened elsewhere", group = "client" }),
-
 	awful.key({ modkey }, "b", function()
 		awful.spawn("brave-browser", { fullscreen = false })
 	end, { description = "Open Firefox", group = "launcher" }),
@@ -580,17 +540,6 @@ globalkeys = gears.table.join(
 		awful.spawn("firefox")
 	end, { description = "Open Firefox", group = "launcher" }),
 
-	--by me end
-
-	-- awful.key({ modkey }, "x", function()
-	-- 	awful.prompt.run({
-	-- 		prompt = "Run Lua code: ",
-	-- 		textbox = awful.screen.focused().mypromptbox.widget,
-	-- 		exe_callback = awful.util.eval,
-	-- 		history_path = awful.util.get_cache_dir() .. "/history_eval",
-	-- 	})
-	-- end, { description = "lua execute prompt", group = "awesome" }),
-	-- Menubar
 	awful.key({ modkey }, "p", function()
 		menubar.show()
 	end, { description = "show the menubar", group = "launcher" })
@@ -833,20 +782,12 @@ client.connect_signal("unfocus", function(c)
 	c.border_color = beautiful.border_normal
 end)
 
--- }}}
 
 -- Autostart Application
--- awful.spawn.with_shell("nitrogen --restore")
-awful.spawn.with_shell("picom --config ~/.config/picom.conf")
-awful.spawn.with_shell("imwheel")
-
--- from here (all added by me)
-
--- scripts added by me
--- awful.spawn.with_shell("~/scripts/awesomeScripts/screenOrienation.sh") -- monitors setup theiro orienation
--- awful.spawn.with_shell("~/scripts/awesomeScripts/fehForSecondScreen") -- monitors setup theiro orienation
-
-awful.spawn.with_shell("feh --bg-fill ~/wallpapers/pubgphoto.jpg") -- to setup wallpaper
-awful.spawn.with_shell("~/scripts/awesomeScripts/swapMonitors.sh") -- monitors setup their position
-
-awful.util.spawn("xinput set-button-map 9 3 2 1")
+awful.spawn.with_shell("picom --config ~/.config/picom.conf") -- for rounded borders
+awful.spawn.with_shell("imwheel") -- for mouse scroll speed
+awful.util.spawn("xinput set-button-map 9 3 2 1") -- swap the mouse buttons left to right and right to left 
+awful.spawn.with_shell(
+	"xrandr --output HDMI-A-0 --mode 1366x768 --pos 1366x0 --rotate normal --output DVI-D-0 --primary --mode 1366x768 --pos 0x0 --rotate normal"
+) -- to swap the monitor and set them into their own places
+awful.spawn.with_shell("feh --bg-fill ~/wallpapers/pubgphoto.jpg") -- to setup background wallpaper
