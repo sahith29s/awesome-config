@@ -796,3 +796,6 @@ awful.spawn.with_shell(
 	"xrandr --output HDMI-A-0 --mode 1366x768 --pos 1366x0 --rotate normal --output DVI-D-0 --primary --mode 1366x768 --pos 0x0 --rotate normal"
 ) -- to swap the monitor and set them into their own places
 awful.spawn.with_shell("feh --bg-fill ~/wallpapers/pubgphoto.jpg") -- to setup background wallpaper
+
+awful.spawn.with_shell("unclutter -idle 0.5") -- auto hide cursor
+
