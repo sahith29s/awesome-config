@@ -362,7 +362,12 @@ globalkeys = gears.table.join(
 
 		-- If Discord is not open, spawn a new instance on the 4th tag
 		if not discord_client then
-			awful.spawn("discord", { tag = screen.tags[4], placement = awful.placement.centered })
+			local screen = awful.screen.focused()
+			local tag = screen.tags[4]
+			if tag then
+				tag:view_only()
+				awful.spawn("discord")
+			end
 		else
 			-- Check if Discord is on the current monitor, if not, move it to the 4th tag of the current monitor
 			if discord_client.screen ~= screen then
