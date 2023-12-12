@@ -1,18 +1,7 @@
-function move_to_tag_on_screen(c, tag, screen)
-    local t = screen.tags[tag]
-    if t then
-        c:move_to_tag(t)
-        t:view_only()
-        client.focus = c
-        c:raise()
-        -- awful.mouse.client.move_to_center(c)
-    end
-end
-
+-------------> requires start <--------------
 -- If LuaRocks is installed, make sure that packages installed through it are
 -- found (e.g. lgi). If LuaRocks is not installed, do nothing.
 pcall(require, "luarocks.loader")
-local awful = require("awful")
 
 -- Standard awesome library
 local gears = require("gears")
@@ -28,10 +17,63 @@ local hotkeys_popup = require("awful.hotkeys_popup")
 -- Enable hotkeys help widget for VIM and other apps
 -- when client with a matching name is opened:
 require("awful.hotkeys_popup.keys")
-
 -- Load Debian menu entries
 local debian = require("debian.menu")
 local has_fdo, freedesktop = pcall(require, "freedesktop")
+local awful = require("awful")
+-------------> till here required end <--------------
+
+
+-------------> functions start <--------------
+
+function move_to_tag_on_screen(c, tag, screen)
+    local t = screen.tags[tag]
+    if t then
+        c:move_to_tag(t)
+        t:view_only()
+        client.focus = c
+        c:raise()
+        -- awful.mouse.client.move_to_center(c)
+    end
+end
+
+-- Function to open or move an application to a specified tag
+function open_or_move_to_tag(app_class, tag_index)
+    local screen = awful.screen.focused()
+    local app_client = nil
+
+    -- Check if the application is already open on any tag
+    for _, c in ipairs(client.get()) do
+        if awful.rules.match(c, { class = app_class }) then
+            app_client = c
+            break
+        end
+    end
+
+    -- If the application is not open, spawn a new instance on the specified tag
+    if not app_client then
+        local tag = screen.tags[tag_index]
+        if tag then
+            tag:view_only()
+            awful.spawn(app_class:lower())  -- Use lower() to ensure consistency in application class names
+        end
+    else
+        -- Check if the application is on the current monitor, if not, move it to the current monitor
+        if app_client.screen ~= screen then
+            awful.client.movetoscreen(app_client, screen)
+        end
+
+        -- Move the application to the specified tag and focus it
+        awful.client.movetotag(screen.tags[tag_index], app_client)
+        awful.tag.viewonly(screen.tags[tag_index])
+        client.focus = app_client
+        app_client:raise()
+    end
+end
+
+-------------> Functions end <--------------
+
+
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
@@ -354,48 +396,6 @@ globalkeys = gears.table.join(
 		awful.client.focus.byidx(-1)
 	end, { description = "focus previous by index", group = "client" }),
 
-	---- Add this line to your globalkeys section
-	-- awful.key({ modkey }, "d", function()
-	-- 	awful.spawn("discord")
-	-- end, { description = "Open Discord", group = "launcher" }),
-
-	awful.key({ modkey }, "d", function()
-		local screen = awful.screen.focused()
-		local discord_client = nil
-
-		-- Check if Discord is already open on any tag
-		for _, c in ipairs(client.get()) do
-			if awful.rules.match(c, { class = "discord" }) then
-				discord_client = c
-				break
-			end
-		end
-
-		-- If Discord is not open, spawn a new instance on the 4th tag
-		if not discord_client then
-			local screen = awful.screen.focused()
-			local tag = screen.tags[4]
-			if tag then
-				tag:view_only()
-				awful.spawn("discord")
-			end
-		else
-			-- Check if Discord is on the current monitor, if not, move it to the 4th tag of the current monitor
-			if discord_client.screen ~= screen then
-				awful.client.movetoscreen(discord_client, screen)
-				awful.client.movetotag(screen.tags[4], discord_client)
-				awful.tag.viewonly(screen.tags[4]) -- switch to 4th workspace
-				client.focus = discord_client
-				discord_client:raise()
-			else
-				-- If Discord is on the current monitor, move to the 4th tag and focus it
-				awful.client.movetotag(screen.tags[4], discord_client)
-				awful.tag.viewonly(screen.tags[4]) -- Switch to the 4th tag / workspace
-				client.focus = discord_client
-				discord_client:raise()
-			end
-		end
-	end, { description = "Open or move Discord to 4th tag", group = "client" }),
 
 	awful.key({ modkey }, "w", function()
 		mymainmenu:show()
@@ -471,86 +471,34 @@ globalkeys = gears.table.join(
 		awful.screen.focused().mypromptbox:run()
 	end, { description = "run prompt", group = "launcher" }),
 
+
 	-- by  me start
 	awful.key({ modkey, "Shift" }, "c", function()
 		awful.spawn("google-chrome-stable")
 	end, { description = "open Google Chrome", group = "applications" }),
 
-	awful.key({ modkey }, "c", function()
-		local screen = awful.screen.focused()
-		local chrome_client = nil
+	-- awful.key({ modkey }, "c", open_or_move_chrome, { description = "Open or move Chrome to 9th tag", group = "client" }),
 
-		-- Check if Chrome is already open on any tag
-		for _, c in ipairs(client.get()) do
-			if awful.rules.match(c, { class = "Google-chrome" }) then
-				chrome_client = c
-				break
-			end
-		end
-
-		-- If Chrome is not open, spawn a new instance on the 9th tag
-		if not chrome_client then
-			local screen = awful.screen.focused()
-			local tag = screen.tags[9]
-			if tag then
-				tag:view_only()
-				awful.spawn("google-chrome-stable")
-			end
-		else
-			-- Check if Chrome is on the 9th tag and not on the current monitor
-			if chrome_client.screen ~= screen and awful.tag.getidx(chrome_client.first_tag) == 9 then
-				awful.client.movetoscreen(chrome_client, screen)
-				awful.client.movetotag(screen.tags[9], chrome_client)
-				awful.tag.viewonly(screen.tags[9]) -- switch to 9th workspace
-				client.focus = chrome_client
-				chrome_client:raise()
-			else
-				-- If Chrome is on the current monitor, move to the 9th tag and focus it
-				awful.client.movetotag(screen.tags[9], chrome_client)
-				awful.tag.viewonly(screen.tags[9]) -- Switch to the 9th tag / workspace
-				client.focus = chrome_client
-				chrome_client:raise()
-			end
-		end
-	end, { description = "Open or move Chrome to 9th tag", group = "client" }),
+	awful.key({ modkey }, "d", function() 
+		open_or_move_to_tag("discord", 4)
+	end, { description = "Open or move VS doee to 4th tag", group = "client" }),
 
 	awful.key({ modkey }, "v", function()
-		local screen = awful.screen.focused()
-		local vs_code_client = nil
+		open_or_move_to_tag("Code", 8)
+	end, { description = "Open or move VS Code to 8th tag", group = "client" }),
 
-		-- Check if VS Code is already open on any tag
-		for _, c in ipairs(client.get()) do
-			if awful.rules.match(c, { class = "Code" }) then
-				vs_code_client = c
-				break
-			end
-		end
-
-		-- If VS Code is not open, spawn a new instance on the 8th tag of the current monitor
-		if not vs_code_client then
-			local screen = awful.screen.focused()
-			local tag = screen.tags[8]
-			if tag then
-				tag:view_only()
-				awful.spawn("code")
-			end
-		else
-			-- Check if VS Code is on the current monitor, if not, move it to the 8th tag of the current monitor
-			if vs_code_client.screen ~= screen then
-				awful.client.movetoscreen(vs_code_client, screen)
-			end
-
-			-- Move VS Code to the 8th tag and focus it
-			awful.client.movetotag(screen.tags[8], vs_code_client)
-			awful.tag.viewonly(screen.tags[8])
-			client.focus = vs_code_client
-			vs_code_client:raise()
-		end
+	awful.key({ modkey }, "c", function()
+		open_or_move_to_tag("Google-chrome", 9)
 	end, { description = "Open or move VS Code to 8th tag", group = "client" }),
 
 	awful.key({ modkey }, "b", function()
-		awful.spawn("brave-browser", { fullscreen = false })
-	end, { description = "Open brave", group = "launcher" }),
+		open_or_move_to_tag("Brave-browser", 7)
+	end, { description = "Open or move brave to 7th tag", group = "client" }),
+
+	-- awful.key({ modkey }, "b", function()
+	-- 	awful.spawn("brave-browser", { fullscreen = false })
+	-- end, { description = "Open brave", group = "launcher" }),
+
 
 	awful.key({ modkey }, "y", function()
 		awful.spawn("firefox")
@@ -586,13 +534,14 @@ clientkeys = gears.table.join(
 	awful.key({ modkey }, "o", function(c)
 	local focused_client = client.focus
     if focused_client then
-
 		local screen_index = awful.screen.focused().index
 		local target_screen = (screen_index % screen.count()) + 1
         if focused_client.class == "Code" then
         	move_to_tag_on_screen(focused_client, 8, screen[target_screen])
-		elseif focused_client.class == "Discord" then
+		elseif focused_client.class == "discord" then
         	move_to_tag_on_screen(focused_client, 4, screen[target_screen])
+		elseif focused_client.class == "Brave-browser" then
+        	move_to_tag_on_screen(focused_client, 7, screen[target_screen])
         elseif focused_client and focused_client.class == "Google-chrome" then
         	move_to_tag_on_screen(focused_client, 9, screen[target_screen])	
         else
