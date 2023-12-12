@@ -1,3 +1,14 @@
+function move_to_tag_on_screen(c, tag, screen)
+    local t = screen.tags[tag]
+    if t then
+        c:move_to_tag(t)
+        t:view_only()
+        client.focus = c
+        c:raise()
+        -- awful.mouse.client.move_to_center(c)
+    end
+end
+
 -- If LuaRocks is installed, make sure that packages installed through it are
 -- found (e.g. lgi). If LuaRocks is not installed, do nothing.
 pcall(require, "luarocks.loader")
@@ -539,7 +550,7 @@ globalkeys = gears.table.join(
 
 	awful.key({ modkey }, "b", function()
 		awful.spawn("brave-browser", { fullscreen = false })
-	end, { description = "Open Firefox", group = "launcher" }),
+	end, { description = "Open brave", group = "launcher" }),
 
 	awful.key({ modkey }, "y", function()
 		awful.spawn("firefox")
@@ -571,9 +582,30 @@ clientkeys = gears.table.join(
 	awful.key({ modkey, "Control" }, "Return", function(c)
 		c:swap(awful.client.getmaster())
 	end, { description = "move to master", group = "client" }),
+
 	awful.key({ modkey }, "o", function(c)
+	local focused_client = client.focus
+    if focused_client then
+
+		local screen_index = awful.screen.focused().index
+		local target_screen = (screen_index % screen.count()) + 1
+        if focused_client.class == "Code" then
+        	move_to_tag_on_screen(focused_client, 8, screen[target_screen])
+		elseif focused_client.class == "Discord" then
+        	move_to_tag_on_screen(focused_client, 4, screen[target_screen])
+        elseif focused_client and focused_client.class == "Google-chrome" then
+        	move_to_tag_on_screen(focused_client, 9, screen[target_screen])	
+        else
+			c:move_to_screen()
+        end
 		c:move_to_screen()
+		c:move_to_screen()
+    else
+        awful.tag.viewnext()
+    end
+
 	end, { description = "move to screen", group = "client" }),
+
 	awful.key({ modkey }, "t", function(c)
 		c.ontop = not c.ontop
 	end, { description = "toggle keep on top", group = "client" }),
@@ -678,6 +710,10 @@ awful.rules.rules = {
 	},
 
 	-- Floating clients.
+	{
+		rule = { class = "Xfce4-terminal" },
+		properties = { width = 200 },
+	},
 	{
 		rule_any = {
 			instance = {
@@ -787,15 +823,13 @@ client.connect_signal("unfocus", function(c)
 	c.border_color = beautiful.border_normal
 end)
 
-
 -- Autostart Application
 awful.spawn.with_shell("picom --config ~/.config/picom.conf") -- for rounded borders
 awful.spawn.with_shell("imwheel") -- for mouse scroll speed
-awful.util.spawn("xinput set-button-map 9 3 2 1") -- swap the mouse buttons left to right and right to left 
+awful.util.spawn("xinput set-button-map 9 3 2 1") -- swap the mouse buttons left to right and right to left
 awful.spawn.with_shell(
 	"xrandr --output HDMI-A-0 --mode 1366x768 --pos 1366x0 --rotate normal --output DVI-D-0 --primary --mode 1366x768 --pos 0x0 --rotate normal"
 ) -- to swap the monitor and set them into their own places
 awful.spawn.with_shell("feh --bg-fill ~/wallpapers/pubgphoto.jpg") -- to setup background wallpaper
 
-awful.spawn.with_shell("unclutter -idle 0.5") -- auto hide cursor
-
+awful.spawn.with_shell("unclutter -idle 1.2") -- auto hide cursor
