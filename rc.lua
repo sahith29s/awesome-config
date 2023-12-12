@@ -33,11 +33,9 @@ function move_to_tag_on_screen(c, tag, screen)
         t:view_only()
         client.focus = c
         c:raise()
-        -- awful.mouse.client.move_to_center(c)
     end
 end
 
--- Function to open or move an application to a specified tag
 function open_or_move_to_tag(app_class, tag_index)
     local screen = awful.screen.focused()
     local app_client = nil
@@ -473,36 +471,49 @@ globalkeys = gears.table.join(
 
 
 	-- by  me start
-	awful.key({ modkey, "Shift" }, "c", function()
-		awful.spawn("google-chrome-stable")
-	end, { description = "open Google Chrome", group = "applications" }),
-
-	-- awful.key({ modkey }, "c", open_or_move_chrome, { description = "Open or move Chrome to 9th tag", group = "client" }),
-
-	awful.key({ modkey }, "d", function() 
+	awful.key({ modkey }, "d", function()
 		open_or_move_to_tag("discord", 4)
 	end, { description = "Open or move VS doee to 4th tag", group = "client" }),
+
+	---- vs code start ----
+	awful.key({ modkey, "Shift" }, "v", function()
+		awful.spawn("code")
+	end, { description = "open code ", group = "applications" }),
 
 	awful.key({ modkey }, "v", function()
 		open_or_move_to_tag("Code", 8)
 	end, { description = "Open or move VS Code to 8th tag", group = "client" }),
+	---- vs code end ----
+
+	---- chrome start ----
+	awful.key({ modkey, "Shift" }, "c", function()
+		awful.spawn("google-chrome-stable")
+	end, { description = "open Google Chrome", group = "applications" }),
 
 	awful.key({ modkey }, "c", function()
 		open_or_move_to_tag("Google-chrome", 9)
 	end, { description = "Open or move VS Code to 8th tag", group = "client" }),
+	---- chrome end ----
+
+	---- brave start ----
+	awful.key({ modkey, "Shift" }, "b", function()
+		awful.spawn("brave-browser")
+	end, { description = "open brave ", group = "applications" }),
 
 	awful.key({ modkey }, "b", function()
 		open_or_move_to_tag("Brave-browser", 7)
 	end, { description = "Open or move brave to 7th tag", group = "client" }),
+	---- brave end ----
 
-	-- awful.key({ modkey }, "b", function()
-	-- 	awful.spawn("brave-browser", { fullscreen = false })
-	-- end, { description = "Open brave", group = "launcher" }),
-
+	---- firefox start ----
+	awful.key({ modkey, "Shift" }, "y", function()
+		awful.spawn("firefox")
+	end, { description = "open Firefox", group = "applications" }),
 
 	awful.key({ modkey }, "y", function()
-		awful.spawn("firefox")
-	end, { description = "Open Firefox", group = "launcher" }),
+		open_or_move_to_tag("firefox", 6)
+	end, { description = "Open or move Firefox to 6th tag", group = "client" }),
+	---- firefox end ----
 
 	awful.key({ modkey }, "p", function()
 		menubar.show()
@@ -544,6 +555,8 @@ clientkeys = gears.table.join(
         	move_to_tag_on_screen(focused_client, 7, screen[target_screen])
         elseif focused_client and focused_client.class == "Google-chrome" then
         	move_to_tag_on_screen(focused_client, 9, screen[target_screen])	
+        elseif focused_client and focused_client.class == "firefox" then
+        	move_to_tag_on_screen(focused_client, 6, screen[target_screen])	
         else
 			c:move_to_screen()
         end
@@ -699,13 +712,7 @@ awful.rules.rules = {
 
 	-- Add titlebars to normal clients and dialogs
 	{ rule_any = { type = { "normal", "dialog" } }, properties = { titlebars_enabled = false } },
-	-- { rule = { class = "Terminator" }, properties = { border_width = 0 } },
-
-	-- Set Firefox to always map on the tag named "2" on screen 1.
-	-- { rule = { class = "Firefox" },
-	--   properties = { screen = 1, tag = "2" } },
 }
--- }}}
 
 -- {{{ Signals
 -- Signal function to execute when a new client appears.
