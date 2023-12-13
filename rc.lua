@@ -25,6 +25,18 @@ local awful = require("awful")
 -------------> till here required end <--------------
 
 -------------> functions start <--------------
+microphone_widget = wibox.widget.textbox()
+microphone_widget.text = "🔊 "
+microphone_timer = timer({ timeout = 0.2 })  -- Update every 0.2 seconds, you can adjust this as needed
+microphone_timer:connect_signal("timeout", function()
+    local status = io.popen("pactl list | sed -n '/^Source/,/^$/p' | grep Mute | sed -n '3p'"):read("*all")
+    local microphone_on = string.match(status, "no")
+    if microphone_on then
+        microphone_widget.text = "🔊 "
+    else
+        microphone_widget.text = "🚫 "
+    end
+end)
 
 function move_to_tag_on_screen(c, tag, screen)
 	local t = screen.tags[tag]
@@ -68,7 +80,6 @@ function open_or_move_to_tag(app_class, tag_index)
 		app_client:raise()
 	end
 end
-
 -------------> Functions end <--------------
 
 -- {{{ Error handling
@@ -191,7 +202,6 @@ mylauncher = awful.widget.launcher({ image = beautiful.awesome_icon, menu = myma
 
 -- Menubar configuration
 menubar.utils.terminal = terminal -- Set the terminal for applications that require it
--- }}}
 
 -- Keyboard map indicator and switcher
 mykeyboardlayout = awful.widget.keyboardlayout()
@@ -202,38 +212,8 @@ mytimer:connect_signal("timeout", function()
 end)
 mytimer:start()
 
--- {{{ Wibar
--- mytextclock = wibox.widget.textclock()
-
--- in
-
-microphone_widget = wibox.widget.textbox()
-microphone_widget.text = " On "
-
--- Create a timer to update the microphone status
-microphone_timer = timer({ timeout = 0.2 })  -- Update every 5 seconds, you can adjust this as needed
-
-microphone_timer:connect_signal("timeout", function()
-    -- Check the microphone status (you may need to replace 'amixer' with your actual command)
-    local status = io.popen("pactl list | sed -n '/^Source/,/^$/p' | grep Mute | sed -n '3p'"):read("*all")
-
-    -- Determine if the microphone is on or off based on the status
-    local microphone_on = string.match(status, "no")
-
-    -- Update the widget text based on the microphone status
-    if microphone_on then
-        microphone_widget.text = " On "
-        -- microphone_widget.text = status
-    else
-        -- microphone_widget.text = "Microphone: kff"
-        microphone_widget.text = " Off "
-    end
-end)
-
--- Start the timer
+-- microphone logo
 microphone_timer:start()
-
--- out 
 
 -- Create a wibox for each screen and add it
 local taglist_buttons = gears.table.join(
@@ -351,7 +331,7 @@ awful.screen.connect_for_each_screen(function(s)
 		layout = wibox.layout.align.horizontal,
 		{ -- Left widgets
 			layout = wibox.layout.fixed.horizontal,
-			mylauncher,
+			-- mylauncher,
 			s.mytaglist,
 			s.mypromptbox,
 		},
@@ -361,6 +341,7 @@ awful.screen.connect_for_each_screen(function(s)
 			mykeyboardlayout,
 			wibox.widget.systray(),
 			microphone_widget,
+			
 			mytextclock,
 			s.mylayoutbox,
 		},
