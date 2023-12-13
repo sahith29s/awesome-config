@@ -1,8 +1,8 @@
 -------------> requires start <--------------
 -- If LuaRocks is installed, make sure that packages installed through it are
 -- found (e.g. lgi). If LuaRocks is not installed, do nothing.
-pcall(require, "luarocks.loader")
 
+pcall(require, "luarocks.loader")
 -- Standard awesome library
 local gears = require("gears")
 require("awful.autofocus")
@@ -21,57 +21,55 @@ require("awful.hotkeys_popup.keys")
 local debian = require("debian.menu")
 local has_fdo, freedesktop = pcall(require, "freedesktop")
 local awful = require("awful")
--------------> till here required end <--------------
 
+-------------> till here required end <--------------
 
 -------------> functions start <--------------
 
 function move_to_tag_on_screen(c, tag, screen)
-    local t = screen.tags[tag]
-    if t then
-        c:move_to_tag(t)
-        t:view_only()
-        client.focus = c
-        c:raise()
-    end
+	local t = screen.tags[tag]
+	if t then
+		c:move_to_tag(t)
+		t:view_only()
+		client.focus = c
+		c:raise()
+	end
 end
 
 function open_or_move_to_tag(app_class, tag_index)
-    local screen = awful.screen.focused()
-    local app_client = nil
+	local screen = awful.screen.focused()
+	local app_client = nil
 
-    -- Check if the application is already open on any tag
-    for _, c in ipairs(client.get()) do
-        if awful.rules.match(c, { class = app_class }) then
-            app_client = c
-            break
-        end
-    end
+	-- Check if the application is already open on any tag
+	for _, c in ipairs(client.get()) do
+		if awful.rules.match(c, { class = app_class }) then
+			app_client = c
+			break
+		end
+	end
 
-    -- If the application is not open, spawn a new instance on the specified tag
-    if not app_client then
-        local tag = screen.tags[tag_index]
-        if tag then
-            tag:view_only()
-            awful.spawn(app_class:lower())  -- Use lower() to ensure consistency in application class names
-        end
-    else
-        -- Check if the application is on the current monitor, if not, move it to the current monitor
-        if app_client.screen ~= screen then
-            awful.client.movetoscreen(app_client, screen)
-        end
+	-- If the application is not open, spawn a new instance on the specified tag
+	if not app_client then
+		local tag = screen.tags[tag_index]
+		if tag then
+			tag:view_only()
+			awful.spawn(app_class:lower()) -- Use lower() to ensure consistency in application class names
+		end
+	else
+		-- Check if the application is on the current monitor, if not, move it to the current monitor
+		if app_client.screen ~= screen then
+			awful.client.movetoscreen(app_client, screen)
+		end
 
-        -- Move the application to the specified tag and focus it
-        awful.client.movetotag(screen.tags[tag_index], app_client)
-        awful.tag.viewonly(screen.tags[tag_index])
-        client.focus = app_client
-        app_client:raise()
-    end
+		-- Move the application to the specified tag and focus it
+		awful.client.movetotag(screen.tags[tag_index], app_client)
+		awful.tag.viewonly(screen.tags[tag_index])
+		client.focus = app_client
+		app_client:raise()
+	end
 end
 
 -------------> Functions end <--------------
-
-
 
 -- {{{ Error handling
 -- Check if awesome encountered an error during startup and fell back to
@@ -200,7 +198,16 @@ mykeyboardlayout = awful.widget.keyboardlayout()
 
 -- {{{ Wibar
 -- Create a textclock widget
-mytextclock = wibox.widget.textclock()
+-- mytextclock = wibox.widget.textclock()
+
+
+
+-- Update the seconds every second
+mytimer = timer({ timeout = 1 })
+mytimer:connect_signal("timeout", function()
+    mytextclock.text = os.date("%H:%M:%S", os.time())
+end)
+mytimer:start()
 
 -- Create a wibox for each screen and add it
 local taglist_buttons = gears.table.join(
@@ -259,11 +266,7 @@ local tasklist_buttons = gears.table.join(
 
 -- Re-set wallpaper when a screen's geometry changes (e.g. different resolution)
 -- screen.connect_signal("property::geometry", set_wallpaper)
-
 awful.screen.connect_for_each_screen(function(s)
-	-- Wallpaper
-	-- set_wallpaper(s)
-
 	-- Each screen has its own tag table.
 	-- awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
 	local names = { "Sahith", "2", "3", "4", "5", "6", "7", "Code", "Browser" }
@@ -305,6 +308,15 @@ awful.screen.connect_for_each_screen(function(s)
 		buttons = tasklist_buttons,
 	})
 
+	local mytextclock = wibox.widget.textclock("%H:%M:%S" , 1)
+
+	-- Update the seconds every second
+	mytimer = timer({ timeout = 1 })
+	mytimer:connect_signal("timeout", function()
+		mytextclock.text = os.date("%H:%M:%S", os.time())
+	end)
+	mytimer:start()
+	
 	-- Create the wibox
 	s.mywibox = awful.wibar({ position = "top", screen = s })
 
@@ -322,6 +334,7 @@ awful.screen.connect_for_each_screen(function(s)
 			layout = wibox.layout.fixed.horizontal,
 			mykeyboardlayout,
 			wibox.widget.systray(),
+			-- microphone_widget,
 			mytextclock,
 			s.mylayoutbox,
 		},
@@ -394,7 +407,6 @@ globalkeys = gears.table.join(
 		awful.client.focus.byidx(-1)
 	end, { description = "focus previous by index", group = "client" }),
 
-
 	awful.key({ modkey }, "w", function()
 		mymainmenu:show()
 	end, { description = "show main menu", group = "awesome" }),
@@ -428,6 +440,7 @@ globalkeys = gears.table.join(
 	awful.key({ modkey }, "Return", function()
 		awful.spawn(terminal)
 	end, { description = "open a terminal", group = "launcher" }),
+
 	awful.key({ modkey, "Control" }, "r", awesome.restart, { description = "reload awesome", group = "awesome" }),
 	awful.key({ modkey, "Shift" }, "q", awesome.quit, { description = "quit awesome", group = "awesome" }),
 
@@ -449,6 +462,7 @@ globalkeys = gears.table.join(
 	awful.key({ modkey, "Control" }, "l", function()
 		awful.tag.incncol(-1, nil, true)
 	end, { description = "decrease the number of columns", group = "layout" }),
+
 	awful.key({ modkey }, "space", function()
 		awful.layout.inc(1)
 	end, { description = "select next", group = "layout" }),
@@ -469,7 +483,6 @@ globalkeys = gears.table.join(
 		awful.screen.focused().mypromptbox:run()
 	end, { description = "run prompt", group = "launcher" }),
 
-
 	-- by  me start
 	awful.key({ modkey }, "d", function()
 		open_or_move_to_tag("discord", 4)
@@ -478,7 +491,7 @@ globalkeys = gears.table.join(
 	---- vs code start ----
 	awful.key({ modkey, "Shift" }, "v", function()
 		awful.spawn("code")
-	end, { description = "open code ", group = "applications" }),
+	end, { description = "open code", group = "applications" }),
 
 	awful.key({ modkey }, "v", function()
 		open_or_move_to_tag("Code", 8)
@@ -492,7 +505,7 @@ globalkeys = gears.table.join(
 
 	awful.key({ modkey }, "c", function()
 		open_or_move_to_tag("Google-chrome", 9)
-	end, { description = "Open or move VS Code to 8th tag", group = "client" }),
+	end, { description = "Open or move Chrome to 9th tag", group = "client" }),
 	---- chrome end ----
 
 	---- brave start ----
@@ -543,29 +556,28 @@ clientkeys = gears.table.join(
 	end, { description = "move to master", group = "client" }),
 
 	awful.key({ modkey }, "o", function(c)
-	local focused_client = client.focus
-    if focused_client then
-		local screen_index = awful.screen.focused().index
-		local target_screen = (screen_index % screen.count()) + 1
-        if focused_client.class == "Code" then
-        	move_to_tag_on_screen(focused_client, 8, screen[target_screen])
-		elseif focused_client.class == "discord" then
-        	move_to_tag_on_screen(focused_client, 4, screen[target_screen])
-		elseif focused_client.class == "Brave-browser" then
-        	move_to_tag_on_screen(focused_client, 7, screen[target_screen])
-        elseif focused_client and focused_client.class == "Google-chrome" then
-        	move_to_tag_on_screen(focused_client, 9, screen[target_screen])	
-        elseif focused_client and focused_client.class == "firefox" then
-        	move_to_tag_on_screen(focused_client, 6, screen[target_screen])	
-        else
+		local focused_client = client.focus
+		if focused_client then
+			local screen_index = awful.screen.focused().index
+			local target_screen = (screen_index % screen.count()) + 1
+			if focused_client.class == "Code" then
+				move_to_tag_on_screen(focused_client, 8, screen[target_screen])
+			elseif focused_client.class == "discord" then
+				move_to_tag_on_screen(focused_client, 4, screen[target_screen])
+			elseif focused_client.class == "Brave-browser" then
+				move_to_tag_on_screen(focused_client, 7, screen[target_screen])
+			elseif focused_client and focused_client.class == "Google-chrome" then
+				move_to_tag_on_screen(focused_client, 9, screen[target_screen])
+			elseif focused_client and focused_client.class == "firefox" then
+				move_to_tag_on_screen(focused_client, 6, screen[target_screen])
+			else
+				c:move_to_screen()
+			end
 			c:move_to_screen()
-        end
-		c:move_to_screen()
-		c:move_to_screen()
-    else
-        awful.tag.viewnext()
-    end
-
+			c:move_to_screen()
+		else
+			awful.tag.viewnext()
+		end
 	end, { description = "move to screen", group = "client" }),
 
 	awful.key({ modkey }, "t", function(c)
@@ -786,6 +798,7 @@ awful.util.spawn("xinput set-button-map 9 3 2 1") -- swap the mouse buttons left
 awful.spawn.with_shell(
 	"xrandr --output HDMI-A-0 --mode 1366x768 --pos 1366x0 --rotate normal --output DVI-D-0 --primary --mode 1366x768 --pos 0x0 --rotate normal"
 ) -- to swap the monitor and set them into their own places
-awful.spawn.with_shell("feh --bg-fill ~/wallpapers/pubgphoto.jpg") -- to setup background wallpaper
+-- awful.spawn.with_shell("feh --bg-fill ~/wallpapers/pubgphoto.jpg") -- to setup background wallpaper
 
 awful.spawn.with_shell("unclutter -idle 1.2") -- auto hide cursor
+awful.spawn.with_shell("nitrogen --restore")
