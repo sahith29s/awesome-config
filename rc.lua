@@ -26,15 +26,15 @@ local awful = require("awful")
 
 -------------> functions start <--------------
 microphone_widget = wibox.widget.textbox()
-microphone_widget.text = "🔊 "
+microphone_widget.text = " 🔊 "
 microphone_timer = timer({ timeout = 0.2 })  -- Update every 0.2 seconds, you can adjust this as needed
 microphone_timer:connect_signal("timeout", function()
-    local status = io.popen("pactl list | sed -n '/^Source/,/^$/p' | grep Mute | sed -n '3p'"):read("*all")
+    local status = io.popen("pactl list | sed -n '/^Source/,/^$/p' | grep Mute | sed -n '2p'"):read("*all")
     local microphone_on = string.match(status, "no")
     if microphone_on then
-        microphone_widget.text = "🔊 "
+        microphone_widget.text = " 🔊 "
     else
-        microphone_widget.text = "🚫 "
+        microphone_widget.text = " 🚫 "
     end
 end)
 
@@ -805,7 +805,5 @@ awful.util.spawn("xinput set-button-map 9 3 2 1") -- swap the mouse buttons left
 awful.spawn.with_shell(
 	"xrandr --output HDMI-A-0 --mode 1366x768 --pos 1366x0 --rotate normal --output DVI-D-0 --primary --mode 1366x768 --pos 0x0 --rotate normal"
 ) -- to swap the monitor and set them into their own places
--- awful.spawn.with_shell("feh --bg-fill ~/wallpapers/pubgphoto.jpg") -- to setup background wallpaper
-
 awful.spawn.with_shell("unclutter -idle 1.2") -- auto hide cursor
 awful.spawn.with_shell("nitrogen --restore")
