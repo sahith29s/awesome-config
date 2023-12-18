@@ -25,19 +25,29 @@ local awful = require("awful")
 -------------> till here required end <--------------
 
 -------------> functions start <--------------
+
+--- single func start---
 microphone_widget = wibox.widget.textbox()
 microphone_widget.text = " 🔊 "
 microphone_timer = timer({ timeout = 0.2 })  -- Update every 0.2 seconds, you can adjust this as needed
+
 microphone_timer:connect_signal("timeout", function()
     local status = io.popen("pactl list | sed -n '/^Source/,/^$/p' | grep Mute | sed -n '2p'"):read("*all")
+    local status2 = io.popen("pactl list | sed -n '/^Source/,/^$/p' | grep Mute | sed -n '3p'"):read("*all")
+	
+
     local microphone_on = string.match(status, "no")
-    if microphone_on then
+    local microphone_on2 = string.match(status2, "no")
+	
+    if microphone_on and microphone_on2 then
         microphone_widget.text = " 🔊 "
     else
         microphone_widget.text = " 🚫 "
     end
 end)
+--- single func end ---
 
+--- single func start ---
 function move_to_tag_on_screen(c, tag, screen)
 	local t = screen.tags[tag]
 	if t then
@@ -47,7 +57,10 @@ function move_to_tag_on_screen(c, tag, screen)
 		c:raise()
 	end
 end
+--- single func end ---
 
+
+--- single func start ---
 function open_or_move_to_tag(app_class, tag_index)
 	local screen = awful.screen.focused()
 	local app_client = nil
@@ -80,6 +93,7 @@ function open_or_move_to_tag(app_class, tag_index)
 		app_client:raise()
 	end
 end
+--- single func end ---
 -------------> Functions end <--------------
 
 -- {{{ Error handling
@@ -361,9 +375,28 @@ root.buttons(gears.table.join(
 
 -- {{{ Key bindings
 globalkeys = gears.table.join(
+
+-- Function to toggle between combined and separate screens
+
+-- Create a keybinding to toggle the screen layout
+
+
 	awful.key({ "Mod1", "Shift" }, ";", function()
 		awful.spawn("shutdown now")
 	end, { description = "Shutdown", group = "awesome" }),
+
+	awful.key({ "Mod1" , "Control"}, "p", function()
+		awful.spawn("xrandr --output DVI-D-0 --same-as HDMI-A-0")
+	end, { description = "combine screens", group = "awesome" }),
+
+	awful.key({ "Mod1" , "Shift" }, "p", function()
+		awful.spawn(
+		"xrandr --output HDMI-A-0 --mode 1366x768 --pos 1366x0 --rotate normal --output DVI-D-0 --primary --mode 1366x768 --pos 0x0 --rotate normal"
+		) -- to swap the monitor and set them into their own places
+	end, { description = "combine screens", group = "awesome" }),
+
+
+
 	awful.key({ modkey }, "s", hotkeys_popup.show_help, { description = "show help", group = "awesome" }),
 	awful.key({ modkey }, "Left", awful.tag.viewprev, { description = "view previous", group = "tag" }),
 	awful.key({ modkey }, "Right", awful.tag.viewnext, { description = "view next", group = "tag" }),
