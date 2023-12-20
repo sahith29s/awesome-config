@@ -26,7 +26,19 @@ local awful = require("awful")
 
 -------------> functions start <--------------
 
---- single func start---
+--- single func start ---
+function toggle_night_mode()
+    local night_theme = require("night-theme")
+    beautiful.init(night_theme)
+end
+--- single func end ---
+
+--- single func start ---
+
+--- single func end---
+
+
+---single func start---
 microphone_widget = wibox.widget.textbox()
 microphone_widget.text = " 🔊 "
 microphone_timer = timer({ timeout = 0.2 })  -- Update every 0.2 seconds, you can adjust this as needed
@@ -130,6 +142,7 @@ end
 -- {{{ Variable definitions
 -- Themes define colours, icons, font and wallpapers.
 -- beautiful.init(gears.filesystem.get_themes_dir() .. "theme/default/theme")
+
 -- beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
 
 -- Define a custom color palette for night mode
@@ -379,8 +392,6 @@ globalkeys = gears.table.join(
 -- Function to toggle between combined and separate screens
 
 -- Create a keybinding to toggle the screen layout
-
-
 	awful.key({ "Mod1", "Shift" }, ";", function()
 		awful.spawn("shutdown now")
 	end, { description = "Shutdown", group = "awesome" }),
@@ -482,7 +493,7 @@ globalkeys = gears.table.join(
 	end, { description = "open a terminal", group = "launcher" }),
 
 	awful.key({ modkey, "Control" }, "r", awesome.restart, { description = "reload awesome", group = "awesome" }),
-	awful.key({ modkey, "Shift" }, "q", awesome.quit, { description = "quit awesome", group = "awesome" }),
+	awful.key({ modkey}, "q", awesome.quit, { description = "quit awesome", group = "awesome" }),
 
 	awful.key({ modkey }, "l", function()
 		awful.tag.incmwfact(0.05)
@@ -580,9 +591,6 @@ clientkeys = gears.table.join(
 	end, { description = "toggle fullscreen", group = "client" }),
 	-- awful.key({ modkey, "Shift" }, "c", function(c)
 	awful.key({ modkey }, "x", function(c)
-		c:kill()
-	end, { description = "close", group = "client" }),
-	awful.key({ modkey }, "q", function(c)
 		c:kill()
 	end, { description = "close", group = "client" }),
 	awful.key(
@@ -840,3 +848,7 @@ awful.spawn.with_shell(
 ) -- to swap the monitor and set them into their own places
 awful.spawn.with_shell("unclutter -idle 1.2") -- auto hide cursor
 awful.spawn.with_shell("nitrogen --restore")
+-- awful.spawn("xrandr --output HDMI-A-0 --gamma 1:0.8:0.5", false)
+-- awful.spawn("xrandr --output DVI-D-0 --gamma 1:0.8:0.5", false)
+-- awful.spawn("xrandr --output DVI-D-0 --gamma 1:0.7:0.5", false)
+awful.spawn.with_shell("redshift -O 2900", false) -- orange tilt
