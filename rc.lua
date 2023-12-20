@@ -27,36 +27,27 @@ local awful = require("awful")
 -------------> functions start <--------------
 
 --- single func start ---
-function toggle_night_mode()
-    local night_theme = require("night-theme")
-    beautiful.init(night_theme)
-end
+volume_widget = wibox.widget.textbox()
+local volumePer = io.popen("amixer -D pulse get Master | awk -F\"[][]\" '/Left:/ { print $2 }'"):read("*all")
+volume_widget.text  = volumePer
 --- single func end ---
-
---- single func start ---
-
---- single func end---
-
 
 ---single func start---
 microphone_widget = wibox.widget.textbox()
 microphone_widget.text = " 🔊 "
-microphone_timer = timer({ timeout = 0.2 })  -- Update every 0.2 seconds, you can adjust this as needed
 
-microphone_timer:connect_signal("timeout", function()
-    local status = io.popen("pactl list | sed -n '/^Source/,/^$/p' | grep Mute | sed -n '2p'"):read("*all")
-    local status2 = io.popen("pactl list | sed -n '/^Source/,/^$/p' | grep Mute | sed -n '3p'"):read("*all")
-	
+local status = io.popen("pactl list | sed -n '/^Source/,/^$/p' | grep Mute | sed -n '2p'"):read("*all")
+local status2 = io.popen("pactl list | sed -n '/^Source/,/^$/p' | grep Mute | sed -n '3p'"):read("*all")
 
-    local microphone_on = string.match(status, "no")
-    local microphone_on2 = string.match(status2, "no")
-	
-    if microphone_on and microphone_on2 then
-        microphone_widget.text = " 🔊 "
-    else
-        microphone_widget.text = " 🚫 "
-    end
-end)
+
+local microphone_on = string.match(status, "no")
+local microphone_on2 = string.match(status2, "no")
+
+if microphone_on and microphone_on2 then
+	microphone_widget.text = " 🔊 "
+else
+	microphone_widget.text = " 🚫 "
+end
 --- single func end ---
 
 --- single func start ---
@@ -239,9 +230,6 @@ mytimer:connect_signal("timeout", function()
 end)
 mytimer:start()
 
--- microphone logo
-microphone_timer:start()
-
 -- Create a wibox for each screen and add it
 local taglist_buttons = gears.table.join(
 	awful.button({}, 1, function(t)
@@ -367,8 +355,8 @@ awful.screen.connect_for_each_screen(function(s)
 			layout = wibox.layout.fixed.horizontal,
 			mykeyboardlayout,
 			wibox.widget.systray(),
+			volume_widget,
 			microphone_widget,
-			
 			mytextclock,
 			s.mylayoutbox,
 		},
@@ -417,18 +405,31 @@ globalkeys = gears.table.join(
 	awful.key({ "Mod1" }, "r", function()
 		-- Toggle microphone mute command
 		awful.spawn("amixer -D pulse sset Capture toggle")
-	end, { description = "Toggle Microphone Mute", group = "media" }),
+		local status = io.popen("pactl list | sed -n '/^Source/,/^$/p' | grep Mute | sed -n '2p'"):read("*all")
+		local status2 = io.popen("pactl list | sed -n '/^Source/,/^$/p' | grep Mute | sed -n '3p'"):read("*all")
+		
 
-	awful.key({}, "XF86AudioMute", function()
-		-- Toggle sound command with amixer
-		awful.spawn("amixer -D pulse set Master 1+ toggle")
-	end, { description = "Toggle Sound", group = "media" }),
+		local microphone_on = string.match(status, "no")
+		local microphone_on2 = string.match(status2, "no")
+		
+		if microphone_on and microphone_on2 then
+			microphone_widget.text = " 🔊 "
+		else
+			microphone_widget.text = " 🚫 "
+		end
+
+	end, { description = "Toggle Microphone Mute", group = "media" }),
 
 	awful.key({}, "XF86AudioRaiseVolume", function()
 		awful.util.spawn("amixer -D pulse sset Master 5%+", false)
+		local volumePer = io.popen("amixer -D pulse get Master | awk -F\"[][]\" '/Left:/ { print $2 }'"):read("*all")
+		volume_widget.text  = volumePer
 	end),
+
 	awful.key({}, "XF86AudioLowerVolume", function()
 		awful.util.spawn("amixer -D pulse sset Master 5%-", false)
+		local volumePer = io.popen("amixer -D pulse get Master | awk -F\"[][]\" '/Left:/ { print $2 }'"):read("*all")
+		volume_widget.text  = volumePer
 	end),
 
 	awful.key({ "Mod1" }, "space", function()
@@ -851,4 +852,4 @@ awful.spawn.with_shell("nitrogen --restore")
 -- awful.spawn("xrandr --output HDMI-A-0 --gamma 1:0.8:0.5", false)
 -- awful.spawn("xrandr --output DVI-D-0 --gamma 1:0.8:0.5", false)
 -- awful.spawn("xrandr --output DVI-D-0 --gamma 1:0.7:0.5", false)
-awful.spawn.with_shell("redshift -O 2900", false) -- orange tilt
+-- awful.spawn.with_shell("redshift -O 2900", false) -- orange tilt
