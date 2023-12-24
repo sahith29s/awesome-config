@@ -220,11 +220,6 @@ menubar.utils.terminal = terminal -- Set the terminal for applications that requ
 -- Keyboard map indicator and switcher
 mykeyboardlayout = awful.widget.keyboardlayout()
 -- Update the seconds every second
-mytimer = timer({ timeout = 1 })
-mytimer:connect_signal("timeout", function()
-    mytextclock.text = os.date("%H:%M:%S", os.time())
-end)
-mytimer:start()
 
 -- Create a wibox for each screen and add it
 local taglist_buttons = gears.table.join(
@@ -325,12 +320,10 @@ awful.screen.connect_for_each_screen(function(s)
 		buttons = tasklist_buttons,
 	})
 
-	local mytextclock = wibox.widget.textclock("%H:%M:%S" , 1)
-
-	-- Update the seconds every second
+	mytextclock = wibox.widget.textclock("%d %a %H:%M:%S")
 	mytimer = timer({ timeout = 1 })
 	mytimer:connect_signal("timeout", function()
-		mytextclock.text = os.date("%H:%M:%S", os.time())
+		mytextclock.text = os.date("%d %a %H:%M:%S", os.time())
 	end)
 	mytimer:start()
 	
