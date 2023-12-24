@@ -21,7 +21,6 @@ require("awful.hotkeys_popup.keys")
 local debian = require("debian.menu")
 local has_fdo, freedesktop = pcall(require, "freedesktop")
 local awful = require("awful")
-
 -------------> till here required end <--------------
 
 -------------> functions start <--------------
@@ -39,15 +38,12 @@ microphone_widget.text = " 🔊 "
 local status = io.popen("pactl list | sed -n '/^Source/,/^$/p' | grep Mute | sed -n '2p'"):read("*all")
 local status2 = io.popen("pactl list | sed -n '/^Source/,/^$/p' | grep Mute | sed -n '3p'"):read("*all")
 
-
-local microphone_on = string.match(status, "no")
-local microphone_on2 = string.match(status2, "no")
-
-if microphone_on and microphone_on2 then
-	microphone_widget.text = " 🔊 "
-else
+if string.find(status, "yes") or string.find(status2, "yes") then
 	microphone_widget.text = " 🚫 "
+else
+	microphone_widget.text = " 🔊 "
 end
+
 --- single func end ---
 
 --- single func start ---
@@ -408,14 +404,10 @@ globalkeys = gears.table.join(
 		local status = io.popen("pactl list | sed -n '/^Source/,/^$/p' | grep Mute | sed -n '2p'"):read("*all")
 		local status2 = io.popen("pactl list | sed -n '/^Source/,/^$/p' | grep Mute | sed -n '3p'"):read("*all")
 		
-
-		local microphone_on = string.match(status, "no")
-		local microphone_on2 = string.match(status2, "no")
-		
-		if microphone_on and microphone_on2 then
-			microphone_widget.text = " 🔊 "
-		else
+		if string.find(status, "yes") or string.find(status2, "yes") then
 			microphone_widget.text = " 🚫 "
+		else
+			microphone_widget.text = " 🔊 "
 		end
 
 	end, { description = "Toggle Microphone Mute", group = "media" }),
@@ -493,7 +485,7 @@ globalkeys = gears.table.join(
 		awful.spawn(terminal)
 	end, { description = "open a terminal", group = "launcher" }),
 
-	awful.key({ modkey, "Control" }, "r", awesome.restart, { description = "reload awesome", group = "awesome" }),
+	awful.key({ modkey }, "r", awesome.restart, { description = "reload awesome", group = "awesome" }),
 	awful.key({ modkey}, "q", awesome.quit, { description = "quit awesome", group = "awesome" }),
 
 	awful.key({ modkey }, "l", function()
@@ -531,9 +523,9 @@ globalkeys = gears.table.join(
 	end, { description = "restore minimized", group = "client" }),
 
 	-- Prompt
-	awful.key({ modkey }, "r", function()
-		awful.screen.focused().mypromptbox:run()
-	end, { description = "run prompt", group = "launcher" }),
+	-- awful.key({ modkey }, "r", function()
+	-- 	awful.screen.focused().mypromptbox:run()
+	-- end, { description = "run prompt", group = "launcher" }),
 
 	-- by  me start
 	awful.key({ modkey }, "d", function()
@@ -852,4 +844,4 @@ awful.spawn.with_shell("nitrogen --restore")
 -- awful.spawn("xrandr --output HDMI-A-0 --gamma 1:0.8:0.5", false)
 -- awful.spawn("xrandr --output DVI-D-0 --gamma 1:0.8:0.5", false)
 -- awful.spawn("xrandr --output DVI-D-0 --gamma 1:0.7:0.5", false)
--- awful.spawn.with_shell("redshift -O 2900", false) -- orange tilt
+awful.spawn.with_shell("redshift -O 2200", false) -- orange tilt
