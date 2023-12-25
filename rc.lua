@@ -397,7 +397,7 @@ globalkeys = gears.table.join(
 		local status = io.popen("pactl list | sed -n '/^Source/,/^$/p' | grep Mute | sed -n '2p'"):read("*all")
 		local status2 = io.popen("pactl list | sed -n '/^Source/,/^$/p' | grep Mute | sed -n '3p'"):read("*all")
 		
-		if string.find(status, "yes") or string.find(status2, "yes") then
+		if string.find(status, "yes") or string.find(status2, "yes") then 
 			microphone_widget.text = " 🚫 "
 		else
 			microphone_widget.text = " 🔊 "
@@ -522,8 +522,8 @@ globalkeys = gears.table.join(
 
 	-- by  me start
 	awful.key({ modkey }, "d", function()
-		open_or_move_to_tag("discord", 4)
-	end, { description = "Open or move VS doee to 4th tag", group = "client" }),
+		open_or_move_to_tag("discord", 5)
+	end, { description = "Open or move VS doee to 5th tag", group = "client"}),
 
 	---- vs code start ----
 	awful.key({ modkey, "Shift" }, "v", function()
@@ -597,7 +597,7 @@ clientkeys = gears.table.join(
 			if focused_client.class == "Code" then
 				move_to_tag_on_screen(focused_client, 8, screen[target_screen])
 			elseif focused_client.class == "discord" then
-				move_to_tag_on_screen(focused_client, 4, screen[target_screen])
+				move_to_tag_on_screen(focused_client, 5, screen[target_screen])
 			elseif focused_client.class == "Brave-browser" then
 				move_to_tag_on_screen(focused_client, 7, screen[target_screen])
 			elseif focused_client and focused_client.class == "Google-chrome" then
