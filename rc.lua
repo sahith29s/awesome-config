@@ -836,7 +836,4 @@ awful.spawn.with_shell(
 ) -- to swap the monitor and set them into their own places
 awful.spawn.with_shell("unclutter -idle 1.2") -- auto hide cursor
 awful.spawn.with_shell("nitrogen --restore")
--- awful.spawn("xrandr --output HDMI-A-0 --gamma 1:0.8:0.5", false)
--- awful.spawn("xrandr --output DVI-D-0 --gamma 1:0.8:0.5", false)
--- awful.spawn("xrandr --output DVI-D-0 --gamma 1:0.7:0.5", false)
 awful.spawn.with_shell("redshift -O 2200", false) -- orange tilt
