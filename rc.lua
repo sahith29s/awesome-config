@@ -281,7 +281,8 @@ local tasklist_buttons = gears.table.join(
 awful.screen.connect_for_each_screen(function(s)
 	-- Each screen has its own tag table.
 	-- awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
-	local names = { "Sahith", "2", "3", "4", "5", "6", "7", "Code", "Browser" }
+	-- local names = { "Sahith", "2", "3", "4", "Discord", "Firefox", "Chrome", "Code", "Browser" }
+	local names = { "Sahith", "2", "3", "4", "Discord", "Firefox", "Brave", "Code", "Chrome" }
 	local l = awful.layout.suit
 
 	local layouts = { l.tile, l.tile, l.tile, l.tile, l.tile, l.tile, l.tile, l.tile, l.tile }
@@ -479,6 +480,7 @@ globalkeys = gears.table.join(
 	end, { description = "open a terminal", group = "launcher" }),
 
 	awful.key({ modkey }, "r", awesome.restart, { description = "reload awesome", group = "awesome" }),
+
 	awful.key({ modkey}, "q", awesome.quit, { description = "quit awesome", group = "awesome" }),
 
 	awful.key({ modkey }, "l", function()
@@ -516,9 +518,9 @@ globalkeys = gears.table.join(
 	end, { description = "restore minimized", group = "client" }),
 
 	-- Prompt
-	-- awful.key({ modkey }, "r", function()
-	-- 	awful.screen.focused().mypromptbox:run()
-	-- end, { description = "run prompt", group = "launcher" }),
+	awful.key({ modkey, "Control" }, "r", function()
+		awful.screen.focused().mypromptbox:run()
+	end, { description = "run prompt", group = "launcher" }),
 
 	-- by  me start
 	awful.key({ modkey }, "d", function()
