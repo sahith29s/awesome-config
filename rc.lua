@@ -27,23 +27,27 @@ local awful = require("awful")
 
 --- single func start ---
 volume_widget = wibox.widget.textbox()
-local volumePer = io.popen("amixer -D pulse get Master | awk -F\"[][]\" '/Left:/ { print $2 }'"):read("*all")
-volume_widget.text  = volumePer
+local command = "amixer -D pulse get Master | awk -F\"[][]\" '/Left:/ { print $2 }'"
+local volumePercentage = io.popen(command):read("*all")
+volume_widget.text  = volumePercentage
+--- single func end ---
+
+--- single func start ---
+function checkMute()
+	isMute = false; stringTable = {}
+	for i = 1, 30 do 
+		local command = string.format("pactl list | sed -n '/^Source/,/^$/p' | grep Mute | sed -n '%dp'", i)
+		local status = io.popen(command):read("*all")
+		if status == "" then break end
+		if string.find(status , "yes") then isMute = true break end
+	end
+	microphone_widget.text = isMute and " 🚫 " or " 🔊 "
+end
 --- single func end ---
 
 ---single func start---
 microphone_widget = wibox.widget.textbox()
-microphone_widget.text = " 🔊 "
-
-local status = io.popen("pactl list | sed -n '/^Source/,/^$/p' | grep Mute | sed -n '2p'"):read("*all")
-local status2 = io.popen("pactl list | sed -n '/^Source/,/^$/p' | grep Mute | sed -n '3p'"):read("*all")
-
-if string.find(status, "yes") or string.find(status2, "yes") then
-	microphone_widget.text = " 🚫 "
-else
-	microphone_widget.text = " 🔊 "
-end
-
+checkMute()
 --- single func end ---
 
 --- single func start ---
@@ -395,27 +399,21 @@ globalkeys = gears.table.join(
 	awful.key({ "Mod1" }, "r", function()
 		-- Toggle microphone mute command
 		awful.spawn("amixer -D pulse sset Capture toggle")
-		local status = io.popen("pactl list | sed -n '/^Source/,/^$/p' | grep Mute | sed -n '2p'"):read("*all")
-		local status2 = io.popen("pactl list | sed -n '/^Source/,/^$/p' | grep Mute | sed -n '3p'"):read("*all")
-		
-		if string.find(status, "yes") or string.find(status2, "yes") then 
-			microphone_widget.text = " 🚫 "
-		else
-			microphone_widget.text = " 🔊 "
-		end
-
+		checkMute()
 	end, { description = "Toggle Microphone Mute", group = "media" }),
 
 	awful.key({}, "XF86AudioRaiseVolume", function()
 		awful.util.spawn("amixer -D pulse sset Master 5%+", false)
-		local volumePer = io.popen("amixer -D pulse get Master | awk -F\"[][]\" '/Left:/ { print $2 }'"):read("*all")
-		volume_widget.text  = volumePer
+		local command = "amixer -D pulse get Master | awk -F\"[][]\" '/Left:/ { print $2 }'"
+		local volumePercentage = io.popen(command):read("*all")
+		volume_widget.text  = volumePercentage
 	end),
 
 	awful.key({}, "XF86AudioLowerVolume", function()
 		awful.util.spawn("amixer -D pulse sset Master 5%-", false)
-		local volumePer = io.popen("amixer -D pulse get Master | awk -F\"[][]\" '/Left:/ { print $2 }'"):read("*all")
-		volume_widget.text  = volumePer
+		local command = "amixer -D pulse get Master | awk -F\"[][]\" '/Left:/ { print $2 }'"
+		local volumePercentage = io.popen(command):read("*all")
+		volume_widget.text  = volumePercentage
 	end),
 
 	awful.key({ "Mod1" }, "space", function()
