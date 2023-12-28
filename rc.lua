@@ -29,17 +29,23 @@ local awful = require("awful")
 volume_widget = wibox.widget.textbox()
 local command = "amixer -D pulse get Master | awk -F\"[][]\" '/Left:/ { print $2 }'"
 local volumePercentage = io.popen(command):read("*all")
-volume_widget.text  = volumePercentage
+volume_widget.text = volumePercentage
 --- single func end ---
 
 --- single func start ---
 function checkMute()
-	isMute = false; stringTable = {}
-	for i = 1, 30 do 
+	isMute = false
+	stringTable = {}
+	for i = 1, 30 do
 		local command = string.format("pactl list | sed -n '/^Source/,/^$/p' | grep Mute | sed -n '%dp'", i)
 		local status = io.popen(command):read("*all")
-		if status == "" then break end
-		if string.find(status , "yes") then isMute = true break end
+		if status == "" then
+			break
+		end
+		if string.find(status, "yes") then
+			isMute = true
+			break
+		end
 	end
 	microphone_widget.text = isMute and " 🚫 " or " 🔊 "
 end
@@ -61,7 +67,6 @@ function move_to_tag_on_screen(c, tag, screen)
 	end
 end
 --- single func end ---
-
 
 --- single func start ---
 function open_or_move_to_tag(app_class, tag_index)
@@ -331,7 +336,7 @@ awful.screen.connect_for_each_screen(function(s)
 		mytextclock.text = os.date("%d %a %H:%M:%S", os.time())
 	end)
 	mytimer:start()
-	
+
 	-- Create the wibox
 	s.mywibox = awful.wibar({ position = "top", screen = s })
 
@@ -371,24 +376,22 @@ root.buttons(gears.table.join(
 -- {{{ Key bindings
 globalkeys = gears.table.join(
 
--- Function to toggle between combined and separate screens
+	-- Function to toggle between combined and separate screens
 
--- Create a keybinding to toggle the screen layout
+	-- Create a keybinding to toggle the screen layout
 	awful.key({ "Mod1", "Shift" }, ";", function()
 		awful.spawn("shutdown now")
 	end, { description = "Shutdown", group = "awesome" }),
 
-	awful.key({ "Mod1" , "Control"}, "p", function()
+	awful.key({ "Mod1", "Control" }, "p", function()
 		awful.spawn("xrandr --output DVI-D-0 --same-as HDMI-A-0")
 	end, { description = "combine screens", group = "awesome" }),
 
-	awful.key({ "Mod1" , "Shift" }, "p", function()
+	awful.key({ "Mod1", "Shift" }, "p", function()
 		awful.spawn(
-		"xrandr --output HDMI-A-0 --mode 1366x768 --pos 1366x0 --rotate normal --output DVI-D-0 --primary --mode 1366x768 --pos 0x0 --rotate normal"
+			"xrandr --output HDMI-A-0 --mode 1366x768 --pos 1366x0 --rotate normal --output DVI-D-0 --primary --mode 1366x768 --pos 0x0 --rotate normal"
 		) -- to swap the monitor and set them into their own places
 	end, { description = "combine screens", group = "awesome" }),
-
-
 
 	awful.key({ modkey }, "s", hotkeys_popup.show_help, { description = "show help", group = "awesome" }),
 	awful.key({ modkey }, "Left", awful.tag.viewprev, { description = "view previous", group = "tag" }),
@@ -406,14 +409,14 @@ globalkeys = gears.table.join(
 		awful.util.spawn("amixer -D pulse sset Master 5%+", false)
 		local command = "amixer -D pulse get Master | awk -F\"[][]\" '/Left:/ { print $2 }'"
 		local volumePercentage = io.popen(command):read("*all")
-		volume_widget.text  = volumePercentage
+		volume_widget.text = volumePercentage
 	end),
 
 	awful.key({}, "XF86AudioLowerVolume", function()
 		awful.util.spawn("amixer -D pulse sset Master 5%-", false)
 		local command = "amixer -D pulse get Master | awk -F\"[][]\" '/Left:/ { print $2 }'"
 		local volumePercentage = io.popen(command):read("*all")
-		volume_widget.text  = volumePercentage
+		volume_widget.text = volumePercentage
 	end),
 
 	awful.key({ "Mod1" }, "space", function()
@@ -423,17 +426,6 @@ globalkeys = gears.table.join(
 	awful.key({}, "Print", function()
 		awful.spawn.with_shell("scrot -s $(zenity --file-selection --save --file=/tmp/screenshot.png)")
 	end, { description = "take a screenshot", group = "screenshot" }),
-
-	-- awful.key({}, "Print", function()
-	-- 	awful.util.spawn("scrot")
-	-- end, { description = "take a screenshot", group = "screenshot" }),
-
-	-- by me end
-	-- commented by me
-
-	-- awful.key({ modkey }, "j", function()
-	-- 	awful.client.focus.byidx(1)
-	-- end, { description = "focus next by index", group = "client" }),
 
 	awful.key({ modkey }, "k", function()
 		awful.client.focus.byidx(1)
@@ -479,7 +471,7 @@ globalkeys = gears.table.join(
 
 	awful.key({ modkey }, "r", awesome.restart, { description = "reload awesome", group = "awesome" }),
 
-	awful.key({ modkey}, "q", awesome.quit, { description = "quit awesome", group = "awesome" }),
+	awful.key({ modkey }, "q", awesome.quit, { description = "quit awesome", group = "awesome" }),
 
 	awful.key({ modkey }, "l", function()
 		awful.tag.incmwfact(0.05)
@@ -523,7 +515,7 @@ globalkeys = gears.table.join(
 	-- by  me start
 	awful.key({ modkey }, "d", function()
 		open_or_move_to_tag("discord", 5)
-	end, { description = "Open or move VS doee to 5th tag", group = "client"}),
+	end, { description = "Open or move VS code to 5th tag", group = "client" }),
 
 	---- vs code start ----
 	awful.key({ modkey, "Shift" }, "v", function()
@@ -826,12 +818,16 @@ client.connect_signal("unfocus", function(c)
 end)
 
 -- Autostart Application
+
+awful.spawn( "noisetorch -s alsa_input.pci-0000_06_00.6.analog-stereo -i -o" ) -- for mouse scroll speed
 awful.spawn.with_shell("picom --config ~/.config/picom.conf") -- for rounded borders
 awful.spawn.with_shell("imwheel") -- for mouse scroll speed
 awful.util.spawn("xinput set-button-map 9 3 2 1") -- swap the mouse buttons left to right and right to left
+awful.spawn("xfce4-terminal")
 awful.spawn.with_shell(
 	"xrandr --output HDMI-A-0 --mode 1366x768 --pos 1366x0 --rotate normal --output DVI-D-0 --primary --mode 1366x768 --pos 0x0 --rotate normal"
 ) -- to swap the monitor and set them into their own places
 awful.spawn.with_shell("unclutter -idle 1.2") -- auto hide cursor
 awful.spawn.with_shell("nitrogen --restore")
+-- awful.spawn.once("redshift -O 2200", false) -- orange tilt
 awful.spawn.with_shell("redshift -O 2200", false) -- orange tilt
