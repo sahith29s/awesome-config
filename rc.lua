@@ -87,13 +87,16 @@ function open_or_move_to_tag(app_class, tag_index)
 		if tag then
 			tag:view_only()
 			awful.spawn(app_class:lower()) -- Use lower() to ensure consistency in application class names
+			if app_class == "discord" then
+				awful.spawn("xfce4-terminal")
+			end
 		end
 	else
 		-- Check if the application is on the current monitor, if not, move it to the current monitor
 		if app_client.screen ~= screen then
 			awful.client.movetoscreen(app_client, screen)
 		end
-
+		
 		-- Move the application to the specified tag and focus it
 		awful.client.movetotag(screen.tags[tag_index], app_client)
 		awful.tag.viewonly(screen.tags[tag_index])
@@ -819,7 +822,6 @@ end)
 
 -- Autostart Application
 
-awful.spawn( "noisetorch -s alsa_input.pci-0000_06_00.6.analog-stereo -i -o" ) -- for mouse scroll speed
 awful.spawn.with_shell("picom --config ~/.config/picom.conf") -- for rounded borders
 awful.spawn.with_shell("imwheel") -- for mouse scroll speed
 awful.util.spawn("xinput set-button-map 9 3 2 1") -- swap the mouse buttons left to right and right to left
