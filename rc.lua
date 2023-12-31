@@ -24,6 +24,21 @@ local awful = require("awful")
 -------------> till here required end <--------------
 
 -------------> functions start <--------------
+function increaseVolume()
+	awful.util.spawn("amixer -D pulse sset Master 5%+", false)
+	local command = "amixer -D pulse get Master | awk -F\"[][]\" '/Left:/ { print $2 }'"
+	local volumePercentage = io.popen(command):read("*all")
+	volume_widget.text = volumePercentage
+end
+
+--- single func start ---
+function decreaseVolume()
+	awful.util.spawn("amixer -D pulse sset Master 5%-", false)
+	local command = "amixer -D pulse get Master | awk -F\"[][]\" '/Left:/ { print $2 }'"
+	local volumePercentage = io.popen(command):read("*all")
+	volume_widget.text = volumePercentage
+end
+--- single func end ---
 
 --- single func start ---
 volume_widget = wibox.widget.textbox()
@@ -409,18 +424,26 @@ globalkeys = gears.table.join(
 	end, { description = "Toggle Microphone Mute", group = "media" }),
 
 	awful.key({}, "XF86AudioRaiseVolume", function()
-		awful.util.spawn("amixer -D pulse sset Master 5%+", false)
-		local command = "amixer -D pulse get Master | awk -F\"[][]\" '/Left:/ { print $2 }'"
-		local volumePercentage = io.popen(command):read("*all")
-		volume_widget.text = volumePercentage
+		increaseVolume()
+	end),
+
+	awful.key({modkey}, "F11", function()
+		increaseVolume()
 	end),
 
 	awful.key({}, "XF86AudioLowerVolume", function()
-		awful.util.spawn("amixer -D pulse sset Master 5%-", false)
-		local command = "amixer -D pulse get Master | awk -F\"[][]\" '/Left:/ { print $2 }'"
-		local volumePercentage = io.popen(command):read("*all")
-		volume_widget.text = volumePercentage
+		decreaseVolume()
 	end),
+
+	awful.key({modkey}, "F10", function()
+		decreaseVolume()
+	end),
+
+	awful.key({ modkey }, "F9", function ()
+		mute_state = not mute_state
+		os.execute("amixer -D pulse sset Master " .. (mute_state and "mute" or "unmute"))
+	end, {description = "Toggle mute", group = "audio"}),
+
 
 	awful.key({ "Mod1" }, "space", function()
 		awful.spawn("flameshot gui")
