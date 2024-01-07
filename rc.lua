@@ -111,7 +111,7 @@ function open_or_move_to_tag(app_class, tag_index)
 		if app_client.screen ~= screen then
 			awful.client.movetoscreen(app_client, screen)
 		end
-		
+
 		-- Move the application to the specified tag and focus it
 		awful.client.movetotag(screen.tags[tag_index], app_client)
 		awful.tag.viewonly(screen.tags[tag_index])
@@ -427,7 +427,7 @@ globalkeys = gears.table.join(
 		increaseVolume()
 	end),
 
-	awful.key({modkey}, "F11", function()
+	awful.key({ modkey }, "F11", function()
 		increaseVolume()
 	end),
 
@@ -435,15 +435,14 @@ globalkeys = gears.table.join(
 		decreaseVolume()
 	end),
 
-	awful.key({modkey}, "F10", function()
+	awful.key({ modkey }, "F10", function()
 		decreaseVolume()
 	end),
 
-	awful.key({ modkey }, "F9", function ()
+	awful.key({ modkey }, "F9", function()
 		mute_state = not mute_state
 		os.execute("amixer -D pulse sset Master " .. (mute_state and "mute" or "unmute"))
-	end, {description = "Toggle mute", group = "audio"}),
-
+	end, { description = "Toggle mute", group = "audio" }),
 
 	awful.key({ "Mod1" }, "space", function()
 		awful.spawn("flameshot gui")
@@ -856,3 +855,4 @@ awful.spawn.with_shell("unclutter -idle 1.2") -- auto hide cursor
 awful.spawn.with_shell("nitrogen --restore")
 -- awful.spawn.once("redshift -O 2200", false) -- orange tilt
 awful.spawn.with_shell("redshift -O 2200", false) -- orange tilt
+awful.spawn.with_shell("xrandr --output HDMI-A-0 --off") --output HDMIturn off the secone monitor
