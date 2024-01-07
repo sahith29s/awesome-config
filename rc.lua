@@ -4,6 +4,7 @@
 
 pcall(require, "luarocks.loader")
 -- Standard awesome library
+local vicious = require("vicious")
 local gears = require("gears")
 require("awful.autofocus")
 -- Widget and layout library
@@ -24,6 +25,14 @@ local awful = require("awful")
 -------------> till here required end <--------------
 
 -------------> functions start <--------------
+
+netwidget = wibox.widget.textbox()
+
+vicious.register(netwidget, vicious.widgets.net, '<span color="#CC9393">${enp4s0 down_kb}</span> <span color="#7F9F7F">${enp4s0 up_kb}</span> ', 3)
+
+-- vicious.register(netwidget, vicious.widgets.net, '↓<span color="#CC9393">${enp4s0 down_mb}</span>MB/s ↑<span color="#7F9F7F">${enp4s0 up_mb}</span>MB/s', 3)
+
+
 function increaseVolume()
 	awful.util.spawn("amixer -D pulse sset Master 5%+", false)
 	local command = "amixer -D pulse get Master | awk -F\"[][]\" '/Left:/ { print $2 }'"
@@ -374,6 +383,7 @@ awful.screen.connect_for_each_screen(function(s)
 			wibox.widget.systray(),
 			volume_widget,
 			microphone_widget,
+			netwidget,
 			mytextclock,
 			s.mylayoutbox,
 		},
@@ -854,5 +864,5 @@ awful.spawn.with_shell(
 awful.spawn.with_shell("unclutter -idle 1.2") -- auto hide cursor
 awful.spawn.with_shell("nitrogen --restore")
 -- awful.spawn.once("redshift -O 2200", false) -- orange tilt
-awful.spawn.with_shell("redshift -O 2200", false) -- orange tilt
-awful.spawn.with_shell("xrandr --output HDMI-A-0 --off") --output HDMIturn off the secone monitor
+-- awful.spawn.with_shell("redshift -O 2200", false) -- orange tilt
+awful.spawn.with_shell("xrandr --output HDMI-A-0 --off") --output HDMIturn off the seconed monitor
