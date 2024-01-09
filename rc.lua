@@ -1,10 +1,13 @@
 -------------> requires start <--------------
 -- If LuaRocks is installed, make sure that packages installed through it are
 -- found (e.g. lgi). If LuaRocks is not installed, do nothing.
+--- requires added by me ---
+local vicious = require("vicious")
+local net_widgets = require("net_widgets")
+--- requires added by me ---
 
 pcall(require, "luarocks.loader")
 -- Standard awesome library
-local vicious = require("vicious")
 local gears = require("gears")
 require("awful.autofocus")
 -- Widget and layout library
@@ -28,10 +31,14 @@ local awful = require("awful")
 
 netwidget = wibox.widget.textbox()
 
-vicious.register(netwidget, vicious.widgets.net, '<span color="#CC9393">${enp4s0 down_kb}</span> <span color="#7F9F7F">${enp4s0 up_kb}</span> ', 3)
+vicious.register(
+	netwidget,
+	vicious.widgets.net,
+	'<span color="#CC9393">${enp4s0 down_kb}</span> <span color="#7F9F7F">${enp4s0 up_kb}</span> ',
+	3
+)
 
 -- vicious.register(netwidget, vicious.widgets.net, '↓<span color="#CC9393">${enp4s0 down_mb}</span>MB/s ↑<span color="#7F9F7F">${enp4s0 up_mb}</span>MB/s', 3)
-
 
 function increaseVolume()
 	awful.util.spawn("amixer -D pulse sset Master 5%+", false)
@@ -412,12 +419,12 @@ globalkeys = gears.table.join(
 	end, { description = "Shutdown", group = "awesome" }),
 
 	awful.key({ "Mod1", "Control" }, "p", function()
-		awful.spawn("xrandr --output DVI-D-0 --same-as HDMI-A-0")
+		awful.spawn("xrandr --output HDMI-A-0 --same-as  DVI-D-0")
 	end, { description = "combine screens", group = "awesome" }),
 
 	awful.key({ "Mod1", "Shift" }, "p", function()
 		awful.spawn(
-			"xrandr --output HDMI-A-0 --mode 1366x768 --pos 1366x0 --rotate normal --output DVI-D-0 --primary --mode 1366x768 --pos 0x0 --rotate normal"
+			"xrandr --output HDMI-A-0 --mode 1920x1080 --pos 1366x0 --rotate normal --output DVI-D-0 --primary --mode 1366x768 --pos 0x0 --rotate normal"
 		) -- to swap the monitor and set them into their own places
 	end, { description = "combine screens", group = "awesome" }),
 
@@ -821,7 +828,7 @@ client.connect_signal("request::titlebars", function(c)
 			layout = wibox.layout.fixed.horizontal,
 		},
 		{ -- Middle
-			{ -- Title
+			{ -- Titl
 				align = "center",
 				widget = awful.titlebar.widget.titlewidget(c),
 			},
@@ -859,10 +866,8 @@ awful.spawn.with_shell("imwheel") -- for mouse scroll speed
 awful.util.spawn("xinput set-button-map 9 3 2 1") -- swap the mouse buttons left to right and right to left
 awful.spawn("xfce4-terminal")
 awful.spawn.with_shell(
-	"xrandr --output HDMI-A-0 --mode 1366x768 --pos 1366x0 --rotate normal --output DVI-D-0 --primary --mode 1366x768 --pos 0x0 --rotate normal"
+	"xrandr --output HDMI-A-0 --primary --mode 1920x1080 --pos 1366x0 --rotate normal --output DVI-D-0 --mode 1366x768 --pos 0x0 --rotate normal"
 ) -- to swap the monitor and set them into their own places
 awful.spawn.with_shell("unclutter -idle 1.2") -- auto hide cursor
 awful.spawn.with_shell("nitrogen --restore")
--- awful.spawn.once("redshift -O 2200", false) -- orange tilt
--- awful.spawn.with_shell("redshift -O 2200", false) -- orange tilt
-awful.spawn.with_shell("xrandr --output HDMI-A-0 --off") --output HDMIturn off the seconed monitor
+awful.spawn.with_shell("redshift -O 2200", false) -- orange tilt
