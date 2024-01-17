@@ -3,7 +3,7 @@
 -- found (e.g. lgi). If LuaRocks is not installed, do nothing.
 --- requires added by me ---
 local vicious = require("vicious")
-local net_widgets = require("net_widgets")
+-- local net_widgets = require("net_widgets")
 --- requires added by me ---
 
 pcall(require, "luarocks.loader")
@@ -372,12 +372,16 @@ awful.screen.connect_for_each_screen(function(s)
 	mytimer:start()
 
 	-- Create the wibox
-	s.mywibox = awful.wibar({ position = "top", screen = s })
+	s.mywibox = awful.wibar({ position = "top", screen = s , height = 22 })
+
+	thisIsMe = wibox.widget.textbox()
+	thisIsMe.text = "     "
 
 	-- Add widgets to the wibox
 	s.mywibox:setup({
 		layout = wibox.layout.align.horizontal,
 		{ -- Left widgets
+			thisIsMe,
 			layout = wibox.layout.fixed.horizontal,
 			-- mylauncher,
 			s.mytaglist,
@@ -393,6 +397,7 @@ awful.screen.connect_for_each_screen(function(s)
 			netwidget,
 			mytextclock,
 			s.mylayoutbox,
+			thisIsMe,
 		},
 	})
 end)
@@ -511,9 +516,9 @@ globalkeys = gears.table.join(
 		awful.spawn(terminal)
 	end, { description = "open a terminal", group = "launcher" }),
 
-	awful.key({ modkey }, "r", awesome.restart, { description = "reload awesome", group = "awesome" }),
+	awful.key({ modkey, "Control" }, "r", awesome.restart, { description = "reload awesome", group = "awesome" }),
 
-	awful.key({ modkey }, "q", awesome.quit, { description = "quit awesome", group = "awesome" }),
+	awful.key({ modkey, "Control" }, "q", awesome.quit, { description = "quit awesome", group = "awesome" }),
 
 	awful.key({ modkey }, "l", function()
 		awful.tag.incmwfact(0.05)
@@ -550,7 +555,7 @@ globalkeys = gears.table.join(
 	end, { description = "restore minimized", group = "client" }),
 
 	-- Prompt
-	awful.key({ modkey, "Control" }, "r", function()
+	awful.key({ modkey }, "r", function()
 		awful.screen.focused().mypromptbox:run()
 	end, { description = "run prompt", group = "launcher" }),
 
@@ -860,14 +865,14 @@ client.connect_signal("unfocus", function(c)
 end)
 
 -- Autostart Application
-
 awful.spawn.with_shell("picom --config ~/.config/picom.conf") -- for rounded borders
 awful.spawn.with_shell("imwheel") -- for mouse scroll speed
 awful.util.spawn("xinput set-button-map 9 3 2 1") -- swap the mouse buttons left to right and right to left
 awful.spawn("xfce4-terminal")
 awful.spawn.with_shell(
+	-- "xrandr --output HDMI-A-0 --primary --mode 1920x1080 --pos 1366x0 --rotate normal --output DVI-D-0 --mode 1366x768 --pos 0x0 --rotate normal"
 	"xrandr --output HDMI-A-0 --primary --mode 1920x1080 --pos 1366x0 --rotate normal --output DVI-D-0 --mode 1366x768 --pos 0x0 --rotate normal"
 ) -- to swap the monitor and set them into their own places
 awful.spawn.with_shell("unclutter -idle 1.2") -- auto hide cursor
 awful.spawn.with_shell("nitrogen --restore")
-awful.spawn.with_shell("redshift -O 2200", false) -- orange tilt
+-- awful.spawn.with_shell("redshift -O 2200", false) -- orange tilt
