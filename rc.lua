@@ -29,13 +29,14 @@ local awful = require("awful")
 
 -------------> functions start <--------------
 
+-- Internet speed o meter
 netwidget = wibox.widget.textbox()
 
 vicious.register(
 	netwidget,
 	vicious.widgets.net,
 	'<span color="#CC9393">${enp4s0 down_kb}</span> <span color="#7F9F7F">${enp4s0 up_kb}</span> ',
-	3
+	1
 )
 
 -- vicious.register(netwidget, vicious.widgets.net, '↓<span color="#CC9393">${enp4s0 down_mb}</span>MB/s ↑<span color="#7F9F7F">${enp4s0 up_mb}</span>MB/s', 3)
@@ -178,7 +179,7 @@ end
 -- Define a custom color palette for night mode
 beautiful.init("/usr/share/awesome/themes/default/theme.lua") -- You might have a different theme path
 -- Set the gap width (in pixels)
-beautiful.useless_gap = 7
+beautiful.useless_gap = 9
 
 -- beautiful.init("~/.config/awesome/theme-dark.lua")
 
@@ -372,16 +373,16 @@ awful.screen.connect_for_each_screen(function(s)
 	mytimer:start()
 
 	-- Create the wibox
-	s.mywibox = awful.wibar({ position = "top", screen = s , height = 22 })
+	s.mywibox = awful.wibar({ position = "top", screen = s, height = 22 })
 
-	thisIsMe = wibox.widget.textbox()
-	thisIsMe.text = "     "
+	marginForStatusBar = wibox.widget.textbox()
+	marginForStatusBar.text = "     "
 
 	-- Add widgets to the wibox
 	s.mywibox:setup({
 		layout = wibox.layout.align.horizontal,
 		{ -- Left widgets
-			thisIsMe,
+			marginForStatusBar,
 			layout = wibox.layout.fixed.horizontal,
 			-- mylauncher,
 			s.mytaglist,
@@ -397,7 +398,7 @@ awful.screen.connect_for_each_screen(function(s)
 			netwidget,
 			mytextclock,
 			s.mylayoutbox,
-			thisIsMe,
+			marginForStatusBar,
 		},
 	})
 end)
@@ -875,4 +876,4 @@ awful.spawn.with_shell(
 ) -- to swap the monitor and set them into their own places
 awful.spawn.with_shell("unclutter -idle 1.2") -- auto hide cursor
 awful.spawn.with_shell("nitrogen --restore")
--- awful.spawn.with_shell("redshift -O 2200", false) -- orange tilt
+awful.spawn.with_shell("redshift -O 2200", false) -- orange tilt
