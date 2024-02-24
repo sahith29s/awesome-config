@@ -870,10 +870,14 @@ awful.spawn.with_shell("picom --config ~/.config/picom.conf") -- for rounded bor
 awful.spawn.with_shell("imwheel") -- for mouse scroll speed
 awful.util.spawn("xinput set-button-map 9 3 2 1") -- swap the mouse buttons left to right and right to left
 awful.spawn("xfce4-terminal")
+-- awful.spawn("google-chrome https://youtube.com", { tag = screen[1].tags[9] })
+
+-- awful.tag.viewonly(awful.screen.focused().tags[9])
+awful.spawn("google-chrome https://youtube.com")
+
 awful.spawn.with_shell(
-	-- "xrandr --output HDMI-A-0 --primary --mode 1920x1080 --pos 1366x0 --rotate normal --output DVI-D-0 --mode 1366x768 --pos 0x0 --rotate normal"
 	"xrandr --output HDMI-A-0 --primary --mode 1920x1080 --pos 1366x0 --rotate normal --output DVI-D-0 --mode 1366x768 --pos 0x0 --rotate normal"
 ) -- to swap the monitor and set them into their own places
 awful.spawn.with_shell("unclutter -idle 1.2") -- auto hide cursor
-awful.spawn.with_shell("nitrogen --restore")
-awful.spawn.with_shell("redshift -O 2200", false) -- orange tilt
+awful.spawn.with_shell("nitrogen --restore") -- for restoring wallpapers
+awful.spawn.with_shell("redshift -O 2100", false) -- orange tilt
