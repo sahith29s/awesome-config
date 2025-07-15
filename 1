@@ -326,10 +326,10 @@ awful.screen.connect_for_each_screen(function(s)
 	-- Each screen has its own tag table.
 	-- awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
 	-- local names = { "Sahith", "2", "3", "4", "Discord", "Firefox", "Chrome", "Code", "Browser" }
-	local names = { "Sahith", "Physics", "Maths", "Chemistry", "Discord", "Firefox", "Brave", "Code", "Chrome" }
+	local names = { "Sahith", "2", "3", "4", "Discord", "Firefox", "Brave", "Code", "Chrome" }
 	local l = awful.layout.suit
 
-	local layouts = { l.tile, l.max, l.max, l.max, l.tile, l.tile, l.tile, l.tile, l.tile }
+	local layouts = { l.tile, l.tile, l.tile, l.tile, l.tile, l.tile, l.tile, l.tile, l.tile }
 	awful.tag(names, s, layouts)
 
 	-- Create a promptbox for each screen
@@ -866,24 +866,18 @@ client.connect_signal("unfocus", function(c)
 end)
 
 -- Autostart Application
--- awful.spawn.with_shell("picom --config ~/.config/picom.conf") -- for rounded borders
-awful.spawn.with_shell("picom -f --config ~/.config/picom.conf") -- for rounded borders
+awful.spawn.with_shell("picom --config ~/.config/picom.conf") -- for rounded borders
 awful.spawn.with_shell("imwheel") -- for mouse scroll speed
--- awful.util.spawn("xinput set-button-map 9 3 2 1") -- swap the mouse buttons left to right and right to left
+awful.util.spawn("xinput set-button-map 9 3 2 1") -- swap the mouse buttons left to right and right to left
 awful.spawn("xfce4-terminal")
 -- awful.spawn("google-chrome https://youtube.com", { tag = screen[1].tags[9] })
 
 -- awful.tag.viewonly(awful.screen.focused().tags[9])
--- awful.spawn("google-chrome https://youtube.com")
-awful.spawn(
-	-- "google-chrome https://youtube.com https://www.pw.live/study/batches/lakshya-jee-air-recorded-2025-933278/batch-overview?came_from=my-batches"
-	-- "google-chrome https://www.pw.live/study/batches/lakshya-jee-air-recorded-2025-933278/batch-overview?came_from=my-batches"
-)
+awful.spawn("google-chrome https://youtube.com")
 
 awful.spawn.with_shell(
 	"xrandr --output HDMI-A-0 --primary --mode 1920x1080 --pos 1366x0 --rotate normal --output DVI-D-0 --mode 1366x768 --pos 0x0 --rotate normal"
 ) -- to swap the monitor and set them into their own places
 awful.spawn.with_shell("unclutter -idle 1.2") -- auto hide cursor
-awful.spawn.with_shell("pactl set-default-sink 1")
 awful.spawn.with_shell("nitrogen --restore") -- for restoring wallpapers
--- awful.spawn.with_shell("redshift -O 2100", false) -- orange tilt
+awful.spawn.with_shell("redshift -O 2100", false) -- orange tilt
